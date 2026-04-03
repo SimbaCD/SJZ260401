@@ -1,0 +1,3044 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>律师的 AI 同事养成手册｜杜思敏</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* ============================
+   Design Tokens
+   ============================ */
+:root {
+  --bg-base: #f3efe8;
+  --bg-deep: #e3ece8;
+  --paper: #fffdf8;
+  --paper-soft: #f7f3ec;
+  --text-main: #1f2b30;
+  --text-sub: #3a4950;
+  --text-faint: #6e7c83;
+  --accent: #0e7a75;
+  --accent-2: #cb5f3d;
+  --accent-3: #f0a14a;
+  --line: rgba(14, 122, 117, 0.24);
+  --ok: #1f9d72;
+  --orb-a: rgba(14, 122, 117, 0.17);
+  --orb-b: rgba(203, 95, 61, 0.13);
+  --cursor-ring-border: rgba(14, 122, 117, 0.55);
+  --cursor-ring-bg: rgba(14, 122, 117, 0.1);
+  --cursor-ring-glow: rgba(14, 122, 117, 0.28);
+  --cursor-ring-active: rgba(203, 95, 61, 0.84);
+  --cursor-ring-active-bg: rgba(203, 95, 61, 0.14);
+  --cursor-dot: #0e7a75;
+  --cursor-dot-glow: rgba(14, 122, 117, 0.55);
+  --paper-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+
+  --font-display: 'Noto Serif SC', serif;
+  --font-body: 'Noto Sans SC', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --title-size: clamp(2rem, 5.8vw, 5rem);
+  --h2-size: clamp(1.3rem, 3.4vw, 2.6rem);
+  --h3-size: clamp(1.05rem, 2.2vw, 1.55rem);
+  --body-size: clamp(0.82rem, 1.4vw, 1.08rem);
+  --small-size: clamp(0.72rem, 1.0vw, 0.9rem);
+
+  --slide-pad: clamp(1rem, 3.2vw, 2.8rem);
+  --gap-lg: clamp(0.9rem, 2.2vw, 1.8rem);
+  --gap-md: clamp(0.55rem, 1.4vw, 1rem);
+
+  --radius: clamp(12px, 1.6vw, 20px);
+  --shadow: 0 32px 84px rgba(20, 44, 45, 0.2);
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ============================
+   Base / Viewport Lock
+   ============================ */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+}
+html {
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+  background:
+    radial-gradient(circle at 16% 12%, rgba(14, 122, 117, 0.24), transparent 34%),
+    radial-gradient(circle at 82% 8%, rgba(203, 95, 61, 0.18), transparent 31%),
+    radial-gradient(circle at 80% 90%, rgba(14, 122, 117, 0.12), transparent 30%),
+    radial-gradient(circle at 18% 88%, rgba(240, 161, 74, 0.11), transparent 28%),
+    conic-gradient(from 142deg at 50% 42%, rgba(14,122,117,0.09), rgba(203,95,61,0.08), rgba(14,122,117,0.06), transparent 76%),
+    linear-gradient(150deg, var(--bg-base), var(--bg-deep));
+}
+body {
+  font-family: var(--font-body);
+  color: var(--text-main);
+  background: transparent;
+  position: relative;
+  isolation: isolate;
+}
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+body::before {
+  z-index: -2;
+  background:
+    radial-gradient(120% 90% at 12% 0%, rgba(255,255,255,0.24), transparent 62%),
+    radial-gradient(140% 100% at 100% 100%, rgba(14,122,117,0.08), transparent 72%);
+  mix-blend-mode: soft-light;
+  animation: meshDrift 20s ease-in-out infinite;
+}
+body::after {
+  z-index: -1;
+  background: radial-gradient(120% 100% at 50% 50%, transparent 58%, rgba(21, 35, 39, 0.1) 100%);
+}
+@keyframes meshDrift {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(-0.8%, 1%, 0) scale(1.02); }
+}
+
+@keyframes driftA {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(2%, -3%, 0) scale(1.06); }
+  100% { transform: translate3d(0, 0, 0) scale(1); }
+}
+@keyframes driftB {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(-3%, 2%, 0) scale(0.95); }
+  100% { transform: translate3d(0, 0, 0) scale(1); }
+}
+@keyframes stageAura {
+  0%, 100% {
+    box-shadow:
+      var(--shadow),
+      inset 0 1px 0 rgba(255, 255, 255, 0.72),
+      inset 0 -1px 0 rgba(14, 122, 117, 0.08),
+      0 0 0 0 rgba(14, 122, 117, 0);
+  }
+  50% {
+    box-shadow:
+      var(--shadow),
+      inset 0 1px 0 rgba(255, 255, 255, 0.72),
+      inset 0 -1px 0 rgba(14, 122, 117, 0.08),
+      0 0 0 1px rgba(14, 122, 117, 0.18),
+      0 0 52px rgba(14, 122, 117, 0.12);
+  }
+}
+@keyframes dotPulse {
+  0%, 100% {
+    box-shadow:
+      0 0 0 6px rgba(14, 122, 117, 0.14),
+      0 0 0 0 rgba(14, 122, 117, 0.24);
+  }
+  50% {
+    box-shadow:
+      0 0 0 6px rgba(14, 122, 117, 0.14),
+      0 0 0 11px rgba(14, 122, 117, 0);
+  }
+}
+@keyframes sweepPass {
+  0% { opacity: 0; transform: translateX(-120%) skewX(-18deg); }
+  28% { opacity: 0.48; }
+  100% { opacity: 0; transform: translateX(130%) skewX(-18deg); }
+}
+
+.deck {
+  position: relative;
+  isolation: isolate;
+}
+
+.slide {
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  scroll-snap-align: start;
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: var(--slide-pad);
+  perspective: 1800px;
+}
+
+.slide::before,
+.slide::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+.slide::before {
+  width: clamp(220px, 28vw, 460px);
+  height: clamp(220px, 28vw, 460px);
+  left: calc(-1 * clamp(90px, 11vw, 180px));
+  top: calc(-1 * clamp(80px, 10vw, 150px));
+  background: radial-gradient(circle at 40% 40%, var(--orb-a), transparent 72%);
+  filter: blur(3px);
+  animation: driftA 14s ease-in-out infinite;
+}
+.slide::after {
+  width: clamp(180px, 22vw, 360px);
+  height: clamp(180px, 22vw, 360px);
+  right: calc(-1 * clamp(75px, 9vw, 140px));
+  bottom: calc(-1 * clamp(75px, 9vw, 140px));
+  background: radial-gradient(circle at 50% 50%, var(--orb-b), transparent 72%);
+  filter: blur(2px);
+  animation: driftB 16s ease-in-out infinite;
+}
+
+.stage {
+  --mx: 82%;
+  --my: 8%;
+  --rx: 0deg;
+  --ry: 0deg;
+  width: min(94vw, 1320px);
+  height: min(88vh, 860px);
+  border-radius: var(--radius);
+  border: 1px solid rgba(14, 122, 117, 0.14);
+  background:
+    var(--paper-noise),
+    linear-gradient(142deg, rgba(255,255,255,0.5), rgba(255,255,255,0) 42%),
+    repeating-linear-gradient(145deg, rgba(14, 122, 117, 0.014) 0 2px, rgba(203, 95, 61, 0.01) 2px 4px),
+    radial-gradient(circle at var(--mx) var(--my), rgba(14, 122, 117, 0.11), transparent 36%),
+    radial-gradient(circle at 10% 110%, rgba(203, 95, 61, 0.08), transparent 44%),
+    linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,255,255,0.88)),
+    var(--paper);
+  box-shadow:
+    var(--shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72),
+    inset 0 -1px 0 rgba(14, 122, 117, 0.08);
+  padding: var(--slide-pad);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--gap-lg);
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+  transform: translateY(clamp(10px, 1.3vw, 18px)) rotateX(var(--rx)) rotateY(var(--ry)) scale(0.985);
+  opacity: 0.86;
+  transition: transform 0.7s var(--ease), opacity 0.7s var(--ease), border-color 0.25s ease;
+  will-change: transform, box-shadow;
+  backdrop-filter: saturate(112%);
+  transform-style: preserve-3d;
+}
+.slide:nth-child(2n) .stage {
+  background:
+    var(--paper-noise),
+    linear-gradient(140deg, rgba(255,255,255,0.54), rgba(255,255,255,0.02) 40%),
+    repeating-linear-gradient(145deg, rgba(14, 122, 117, 0.012) 0 2px, rgba(203, 95, 61, 0.014) 2px 4px),
+    radial-gradient(circle at var(--mx) var(--my), rgba(203, 95, 61, 0.1), transparent 36%),
+    radial-gradient(circle at 10% 110%, rgba(14, 122, 117, 0.08), transparent 44%),
+    linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,255,255,0.88)),
+    var(--paper);
+}
+.slide:nth-child(3n) .stage {
+  border-color: rgba(203, 95, 61, 0.2);
+}
+.slide.visible .stage {
+  transform: translateY(0) rotateX(var(--rx)) rotateY(var(--ry)) scale(1);
+  opacity: 1;
+  animation: stageAura 5.8s ease-in-out infinite;
+}
+
+.stage::after {
+  content: "";
+  position: absolute;
+  right: clamp(12px, 2vw, 26px);
+  top: clamp(12px, 2vw, 24px);
+  width: clamp(88px, 10vw, 138px);
+  height: 1px;
+  background: linear-gradient(90deg, rgba(14,122,117,0), rgba(14,122,117,0.62));
+}
+.stage::before {
+  content: "";
+  position: absolute;
+  left: clamp(14px, 2.2vw, 30px);
+  top: clamp(10px, 1.8vw, 24px);
+  width: clamp(34px, 3.4vw, 48px);
+  height: clamp(34px, 3.4vw, 48px);
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 3px rgba(14, 122, 117, 0.04);
+}
+.stage > * {
+  position: relative;
+  z-index: 1;
+  transform: translateZ(0.1px);
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  letter-spacing: 0.02em;
+  font-weight: 700;
+  line-height: 1.2;
+}
+h1 { font-size: var(--title-size); }
+h2 { font-size: var(--h2-size); }
+h3 { font-size: var(--h3-size); }
+h1 {
+  text-wrap: balance;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.42);
+}
+.slide:first-child h1 {
+  background: linear-gradient(120deg, #1f403f 6%, var(--accent) 44%, var(--accent-2) 96%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: none;
+}
+h2 {
+  position: relative;
+  padding-bottom: clamp(0.28rem, 0.9vw, 0.62rem);
+}
+h2::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: clamp(84px, 12vw, 160px);
+  background: linear-gradient(90deg, rgba(14,122,117,0.8), rgba(203,95,61,0.72));
+  transform: scaleX(0.2);
+  transform-origin: left;
+  opacity: 0.65;
+  transition: transform 0.6s var(--ease), opacity 0.4s ease;
+}
+.slide.visible h2::after {
+  transform: scaleX(1);
+  opacity: 0.95;
+}
+p, li { font-size: var(--body-size); line-height: 1.56; color: var(--text-sub); }
+ul { list-style: none; display: grid; gap: var(--gap-md); }
+
+.kicker {
+  font-family: var(--font-mono);
+  color: var(--accent);
+  font-size: var(--small-size);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  width: fit-content;
+  padding: 0.14em 0.56em;
+  border-radius: 999px;
+  border: 1px solid rgba(14, 122, 117, 0.24);
+  background: linear-gradient(135deg, rgba(14,122,117,0.08), rgba(240,161,74,0.06));
+}
+
+.highlight { color: var(--accent); font-weight: 700; }
+.muted { color: var(--text-faint); }
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--gap-lg);
+  align-items: stretch;
+}
+
+.card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(14, 122, 117, 0.18);
+  border-radius: clamp(10px, 1.2vw, 16px);
+  background:
+    linear-gradient(155deg, rgba(255,255,255,0.82), rgba(247,243,236,0.94)),
+    var(--paper-soft);
+  padding: clamp(0.75rem, 1.8vw, 1.25rem);
+  display: grid;
+  gap: clamp(0.35rem, 1vw, 0.7rem);
+  transition: transform 0.25s var(--ease), border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+  box-shadow: 0 7px 18px rgba(20, 60, 58, 0.07);
+}
+.card::after {
+  content: "";
+  position: absolute;
+  top: -20%;
+  left: calc(-1 * clamp(60px, 7vw, 120px));
+  width: clamp(80px, 9vw, 140px);
+  height: 140%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent);
+  transform: rotate(14deg);
+  opacity: 0;
+  transition: left 0.55s var(--ease), opacity 0.25s ease;
+}
+.card:hover {
+  transform: translateY(calc(-1 * clamp(2px, 0.4vw, 6px)));
+  border-color: rgba(14, 122, 117, 0.55);
+  background:
+    linear-gradient(155deg, rgba(255,255,255,0.92), rgba(247,243,236,0.98)),
+    var(--paper-soft);
+  box-shadow: 0 14px 30px rgba(22, 66, 63, 0.15);
+}
+.card:hover::after {
+  left: calc(100% + clamp(40px, 5vw, 90px));
+  opacity: 1;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  border: 1px solid rgba(14, 122, 117, 0.5);
+  padding: 0.22em 0.72em;
+  border-radius: 999px;
+  font-size: var(--small-size);
+  color: var(--accent);
+}
+
+.code {
+  font-family: var(--font-mono);
+  font-size: clamp(0.7rem, 1.05vw, 0.92rem);
+  line-height: 1.45;
+  color: #e6f3f1;
+  background: #142b2e;
+  border: 1px solid rgba(112, 182, 172, 0.45);
+  border-radius: 10px;
+  padding: 0.75rem 0.85rem;
+  white-space: pre-wrap;
+}
+
+.quote {
+  border-left: 3px solid var(--accent);
+  padding: clamp(0.3rem, 0.9vw, 0.5rem) 0 clamp(0.3rem, 0.9vw, 0.5rem) clamp(0.8rem, 1.8vw, 1.2rem);
+  font-size: clamp(1rem, 2vw, 1.35rem);
+  color: var(--text-main);
+  line-height: 1.45;
+  border-radius: 8px;
+  background: linear-gradient(90deg, rgba(14,122,117,0.08), rgba(14,122,117,0) 62%);
+}
+
+.evidence-chain {
+  margin-top: clamp(0.3rem, 0.9vw, 0.7rem);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
+  align-items: center;
+  gap: clamp(0.24rem, 0.8vw, 0.7rem);
+}
+.evidence-chain .chain-step {
+  border: 1px solid rgba(14, 122, 117, 0.24);
+  background: rgba(255, 255, 255, 0.82);
+  border-radius: 10px;
+  padding: clamp(0.28rem, 0.8vw, 0.52rem) clamp(0.34rem, 1vw, 0.75rem);
+  text-align: center;
+  font-size: clamp(0.62rem, 1.0vw, 0.84rem);
+  color: #1f4f4d;
+  box-shadow: 0 6px 14px rgba(18, 58, 55, 0.08);
+  opacity: 0.84;
+  transform: translateY(5px);
+  transition: opacity 0.46s ease, transform 0.46s var(--ease), border-color 0.3s ease;
+}
+.evidence-chain .chain-link {
+  width: clamp(12px, 2.2vw, 32px);
+  height: 2px;
+  background: linear-gradient(90deg, rgba(14,122,117,0.24), rgba(14,122,117,0.72));
+  transform-origin: left;
+  transform: scaleX(0.08);
+  opacity: 0.42;
+  transition: transform 0.52s var(--ease), opacity 0.35s ease;
+}
+.evidence-chain .s1 { transition-delay: 30ms; }
+.evidence-chain .l1 { transition-delay: 100ms; }
+.evidence-chain .s2 { transition-delay: 170ms; }
+.evidence-chain .l2 { transition-delay: 240ms; }
+.evidence-chain .s3 { transition-delay: 310ms; }
+.evidence-chain .l3 { transition-delay: 380ms; }
+.evidence-chain .s4 { transition-delay: 450ms; }
+.slide.visible .evidence-chain.reveal.revealed .chain-step {
+  opacity: 1;
+  transform: translateY(0);
+  border-color: rgba(14, 122, 117, 0.52);
+}
+.slide.visible .evidence-chain.reveal.revealed .chain-link {
+  transform: scaleX(1);
+  opacity: 0.95;
+}
+
+/* ============================
+   Chrome
+   ============================ */
+.progress-wrap {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 5px;
+  background: rgba(14, 122, 117, 0.14);
+  z-index: 60;
+}
+.progress-bar {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(92deg, var(--accent), var(--accent-3), var(--accent-2));
+  background-size: 180% 100%;
+  transition: width 0.3s ease;
+  animation: progressFlow 8s linear infinite;
+}
+@keyframes progressFlow {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+.nav-dots {
+  position: fixed;
+  right: clamp(8px, 1.5vw, 20px);
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  gap: clamp(0.28rem, 0.7vw, 0.5rem);
+  z-index: 50;
+}
+.nav-dots button {
+  width: clamp(7px, 1vw, 10px);
+  height: clamp(7px, 1vw, 10px);
+  border-radius: 999px;
+  border: 1px solid rgba(14, 122, 117, 0.2);
+  background: rgba(14, 122, 117, 0.24);
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease, width 0.28s var(--ease), border-color 0.2s ease;
+}
+.nav-dots button.active {
+  width: clamp(15px, 1.5vw, 22px);
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  border-color: rgba(14, 122, 117, 0.4);
+  transform: scale(1.05);
+  box-shadow: 0 0 0 6px rgba(14, 122, 117, 0.14);
+  animation: dotPulse 1.5s ease-out infinite;
+}
+
+.counter {
+  position: fixed;
+  right: clamp(12px, 2vw, 24px);
+  bottom: clamp(8px, 1.4vh, 16px);
+  font-family: var(--font-mono);
+  font-size: var(--small-size);
+  color: var(--text-faint);
+  z-index: 60;
+}
+
+.transition-flash {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 55;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(14, 122, 117, 0.24), transparent 42%),
+    radial-gradient(circle at 72% 24%, rgba(203, 95, 61, 0.2), transparent 36%),
+    radial-gradient(circle at 22% 78%, rgba(240, 161, 74, 0.16), transparent 34%);
+}
+.transition-flash.active {
+  animation: flashPulse 460ms var(--ease);
+}
+.transition-sweep {
+  position: fixed;
+  inset: -5% -18%;
+  pointer-events: none;
+  z-index: 56;
+  opacity: 0;
+  background:
+    linear-gradient(108deg,
+      transparent 20%,
+      rgba(255,255,255,0.12) 35%,
+      rgba(14,122,117,0.28) 46%,
+      rgba(203,95,61,0.26) 54%,
+      rgba(240,161,74,0.18) 60%,
+      transparent 76%);
+  filter: blur(4px);
+}
+.transition-sweep.active {
+  animation: sweepPass 600ms var(--ease);
+}
+@keyframes flashPulse {
+  0% { opacity: 0; transform: scale(0.98); }
+  35% { opacity: 0.58; }
+  100% { opacity: 0; transform: scale(1.03); }
+}
+
+.chapter-chip {
+  position: fixed;
+  left: clamp(10px, 1.8vw, 24px);
+  top: clamp(10px, 1.8vh, 22px);
+  padding: 0.28rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid rgba(14, 122, 117, 0.42);
+  background: linear-gradient(135deg, rgba(255,255,255,0.86), rgba(250,246,239,0.66));
+  backdrop-filter: blur(6px);
+  font-family: var(--font-mono);
+  font-size: var(--small-size);
+  color: #23494b;
+  z-index: 61;
+  max-width: min(74vw, 520px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.brand-watermark {
+  position: absolute;
+  right: clamp(18px, 2.2vw, 30px);
+  top: clamp(16px, 2vh, 26px);
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.42rem;
+  pointer-events: none;
+  padding: 0.16rem 0;
+  font-family: var(--font-mono);
+  font-size: clamp(0.62rem, 1.02vw, 0.82rem);
+  letter-spacing: 0.05em;
+  color: rgba(22, 29, 54, 0.84);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.62);
+}
+.brand-watermark::after {
+  content: "";
+  width: clamp(30px, 3.8vw, 52px);
+  height: 1px;
+  margin-left: clamp(2px, 0.6vw, 8px);
+  background: linear-gradient(90deg, rgba(22,29,54,0.44), rgba(22,29,54,0));
+}
+.brand-watermark::before {
+  content: "";
+  width: clamp(14px, 1.6vw, 20px);
+  height: clamp(14px, 1.6vw, 20px);
+  border: 1px solid rgba(22, 29, 54, 0.4);
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 3px rgba(22, 29, 54, 0.08);
+  opacity: 0.9;
+}
+.brand-watermark .brand-main {
+  font-weight: 600;
+  white-space: nowrap;
+}
+.brand-watermark .brand-sep {
+  opacity: 0.45;
+  transform: translateY(-1px);
+}
+.brand-watermark .brand-sub {
+  opacity: 0.78;
+  letter-spacing: 0.035em;
+  white-space: nowrap;
+}
+
+.speaker-view {
+  position: fixed;
+  right: clamp(12px, 2vw, 24px);
+  bottom: clamp(36px, 5.6vh, 72px);
+  width: min(38vw, 460px);
+  max-width: 92vw;
+  z-index: 67;
+  border: 1px solid rgba(14, 122, 117, 0.26);
+  border-radius: 12px;
+  background: linear-gradient(145deg, rgba(255,255,255,0.94), rgba(248,252,255,0.86));
+  backdrop-filter: blur(8px);
+  box-shadow: 0 16px 34px rgba(18, 47, 46, 0.14);
+  padding: clamp(0.58rem, 1.1vw, 0.9rem);
+  display: grid;
+  gap: clamp(0.35rem, 0.8vw, 0.58rem);
+  opacity: 0;
+  transform: translateY(10px) scale(0.985);
+  pointer-events: none;
+  transition: opacity 0.24s ease, transform 0.28s var(--ease);
+}
+.speaker-view.show {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+.speaker-title {
+  font-family: var(--font-mono);
+  font-size: clamp(0.62rem, 1vw, 0.8rem);
+  letter-spacing: 0.05em;
+  color: #1e5351;
+}
+.speaker-box {
+  border: 1px solid rgba(14, 122, 117, 0.2);
+  background: rgba(255,255,255,0.72);
+  border-radius: 9px;
+  padding: clamp(0.38rem, 0.9vw, 0.62rem);
+  display: grid;
+  gap: 0.22rem;
+}
+.speaker-label {
+  font-size: clamp(0.56rem, 0.86vw, 0.72rem);
+  color: #5d7178;
+  letter-spacing: 0.03em;
+}
+.speaker-value {
+  font-size: clamp(0.66rem, 1.02vw, 0.86rem);
+  color: #274f50;
+  line-height: 1.5;
+  white-space: pre-line;
+}
+
+.editor-panel {
+  position: fixed;
+  left: clamp(10px, 1.8vw, 24px);
+  bottom: clamp(8px, 1.4vh, 16px);
+  z-index: 65;
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  max-width: min(84vw, 760px);
+}
+.editor-panel button {
+  border: 1px solid rgba(14, 122, 117, 0.4);
+  background: rgba(255,255,255,0.9);
+  color: #1f5350;
+  border-radius: 8px;
+  padding: 0.25rem 0.55rem;
+  font-size: clamp(0.62rem, 0.95vw, 0.8rem);
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+.editor-panel button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(14, 122, 117, 0.7);
+}
+.editor-panel .active {
+  background: var(--accent);
+  color: #fff;
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: clamp(8px, 1.4vh, 16px);
+  transform: translateX(-50%);
+  z-index: 66;
+  background: rgba(29, 42, 46, 0.92);
+  color: #f4f8f6;
+  border-radius: 10px;
+  padding: 0.38rem 0.65rem;
+  font-size: clamp(0.62rem, 0.95vw, 0.82rem);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s ease;
+}
+.toast.show { opacity: 1; }
+
+.cursor-aura {
+  position: fixed;
+  width: clamp(120px, 12vw, 190px);
+  height: clamp(120px, 12vw, 190px);
+  left: 0;
+  top: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 52;
+  background:
+    radial-gradient(circle at 45% 45%, rgba(14,122,117,0.26), rgba(14,122,117,0.06) 40%, transparent 68%),
+    radial-gradient(circle at 62% 58%, rgba(203,95,61,0.16), transparent 62%);
+  filter: blur(14px);
+  mix-blend-mode: multiply;
+  opacity: 0.42;
+  transform: translate3d(-999px, -999px, 0);
+  transition: opacity 0.3s ease;
+}
+.cursor-ring,
+.cursor-dot {
+  position: fixed;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  transform: translate3d(-999px, -999px, 0);
+}
+.cursor-ring {
+  width: clamp(28px, 2.6vw, 38px);
+  height: clamp(28px, 2.6vw, 38px);
+  border-radius: 50%;
+  z-index: 54;
+  border: 1.5px solid var(--cursor-ring-border);
+  background: var(--cursor-ring-bg);
+  box-shadow: 0 0 26px var(--cursor-ring-glow);
+  transition: opacity 0.2s ease, border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+.cursor-ring.interactive {
+  border-color: var(--cursor-ring-active);
+  background: var(--cursor-ring-active-bg);
+  box-shadow: 0 0 30px rgba(203, 95, 61, 0.28);
+}
+.cursor-dot {
+  width: clamp(7px, 0.7vw, 10px);
+  height: clamp(7px, 0.7vw, 10px);
+  border-radius: 50%;
+  z-index: 55;
+  background: var(--cursor-dot);
+  box-shadow: 0 0 15px var(--cursor-dot-glow);
+}
+body.custom-cursor,
+body.custom-cursor * {
+  cursor: none !important;
+}
+body.edit-mode .cursor-aura {
+  opacity: 0.2;
+}
+body.edit-mode .cursor-ring,
+body.edit-mode .cursor-dot {
+  opacity: 0;
+}
+
+body.edit-mode [data-editable="true"] {
+  outline: 1px dashed rgba(14, 122, 117, 0.35);
+  outline-offset: 2px;
+  cursor: text;
+}
+body.edit-mode [data-editable="true"]:focus {
+  outline: 2px solid rgba(14, 122, 117, 0.7);
+  background: rgba(14, 122, 117, 0.06);
+}
+
+.injected-image-wrap {
+  margin-top: clamp(0.4rem, 1.1vw, 0.9rem);
+  display: flex;
+  justify-content: center;
+}
+.injected-image {
+  max-width: min(90%, 760px);
+  max-height: min(34vh, 280px);
+  object-fit: contain;
+  border-radius: 12px;
+  border: 1px solid rgba(14, 122, 117, 0.24);
+  box-shadow: 0 8px 22px rgba(26, 47, 49, 0.12);
+}
+.ide-demo-inline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: clamp(0.7rem, 1.6vw, 1.2rem);
+  flex-wrap: wrap;
+}
+.ide-demo-inline .ide-demo-note {
+  flex: 1 1 240px;
+}
+.ide-demo-thumb {
+  width: clamp(132px, 18vw, 220px);
+  border-radius: 12px;
+  border: 1px solid rgba(14, 122, 117, 0.34);
+  background: #fff;
+  box-shadow: 0 10px 22px rgba(18, 46, 49, 0.18);
+  cursor: zoom-in;
+  transition: transform 0.25s var(--ease), box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.ide-demo-thumb:hover {
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 16px 28px rgba(20, 52, 56, 0.2);
+  border-color: rgba(14, 122, 117, 0.58);
+}
+.image-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 140;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(16px, 3vw, 28px);
+  background: rgba(9, 16, 27, 0.78);
+  backdrop-filter: blur(6px) saturate(110%);
+}
+.image-lightbox.show {
+  display: flex;
+}
+.image-lightbox img {
+  max-width: min(94vw, 1580px);
+  max-height: 92vh;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  box-shadow: 0 28px 56px rgba(3, 8, 20, 0.58);
+  background: #fff;
+  cursor: zoom-out;
+}
+.image-lightbox-hint {
+  position: fixed;
+  bottom: clamp(14px, 2.2vw, 24px);
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: var(--small-size);
+  color: rgba(232, 240, 255, 0.88);
+  letter-spacing: 0.03em;
+  pointer-events: none;
+}
+body.lightbox-open .cursor-aura,
+body.lightbox-open .cursor-ring,
+body.lightbox-open .cursor-dot {
+  opacity: 0 !important;
+}
+
+/* ============================
+   Motion
+   ============================ */
+.reveal {
+  opacity: 0;
+  transform: translateY(clamp(12px, 1.8vw, 26px)) scale(0.988);
+  transition: opacity 0.65s var(--ease), transform 0.65s var(--ease), filter 0.65s var(--ease);
+  filter: blur(0.5px);
+  transition-delay: calc(var(--d, 0) * 95ms);
+}
+.slide.visible .reveal {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0);
+}
+.slide.dual-reveal .reveal {
+  transition-delay: calc(var(--d, 0) * 72ms + var(--lane-delay, 0ms));
+}
+.slide.dual-reveal .reveal.lane-left { --lane-delay: 0ms; }
+.slide.dual-reveal .reveal.lane-right { --lane-delay: 320ms; }
+.slide.step-reveal .reveal {
+  transition-delay: 0ms;
+}
+.slide.step-reveal.visible .reveal {
+  opacity: 0;
+  transform: translateY(clamp(12px, 1.8vw, 26px)) scale(0.988);
+  filter: blur(0.5px);
+}
+.slide.step-reveal.visible .reveal.revealed {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0);
+}
+body.edit-mode .slide.visible .reveal {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0);
+}
+
+/* ============================
+   Responsive
+   ============================ */
+@media (max-width: 980px) {
+  .grid-2 { grid-template-columns: 1fr; }
+  .stage { width: min(96vw, 1320px); }
+  .evidence-chain {
+    grid-template-columns: 1fr;
+    gap: 0.34rem;
+  }
+  .evidence-chain .chain-link {
+    width: 2px;
+    height: 14px;
+    justify-self: center;
+    transform-origin: top;
+    transform: scaleY(0.08);
+  }
+  .slide.visible .evidence-chain.reveal.revealed .chain-link {
+    transform: scaleY(1);
+  }
+}
+@media (max-height: 700px) {
+  :root {
+    --slide-pad: clamp(0.7rem, 2.4vw, 1.6rem);
+    --title-size: clamp(1.5rem, 4.4vw, 2.8rem);
+    --h2-size: clamp(1.1rem, 2.8vw, 1.8rem);
+    --body-size: clamp(0.75rem, 1.2vw, 0.95rem);
+  }
+}
+@media (max-height: 600px) {
+  :root {
+    --slide-pad: clamp(0.55rem, 2vw, 1.2rem);
+    --title-size: clamp(1.35rem, 4.0vw, 2.2rem);
+    --h2-size: clamp(1.0rem, 2.5vw, 1.5rem);
+    --body-size: clamp(0.68rem, 1.05vw, 0.86rem);
+  }
+}
+@media (max-height: 500px) {
+  :root {
+    --slide-pad: clamp(0.45rem, 1.5vw, 0.95rem);
+    --body-size: clamp(0.64rem, 0.9vw, 0.78rem);
+  }
+  .nav-dots { display: none; }
+  .chapter-chip { display: none; }
+  .brand-watermark { display: none; }
+  .speaker-view { display: none; }
+  .editor-panel { left: 10px; bottom: 8px; max-width: 92vw; }
+  .cursor-aura { display: none; }
+  .cursor-ring,
+  .cursor-dot { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.15s !important;
+  }
+  html { scroll-behavior: auto; }
+  .slide::before,
+  .slide::after { animation: none !important; }
+  .transition-flash { display: none; }
+  .transition-sweep { display: none; }
+  .cursor-aura { display: none; }
+  .cursor-ring,
+  .cursor-dot { display: none; }
+  .slide.visible .stage { animation: none !important; }
+  .evidence-chain .chain-link,
+  .evidence-chain .chain-step { transition: none !important; }
+}
+
+/* ============================
+   Art Template: Editorial Contrast
+   ============================ */
+:root {
+  --bg-base: #101218;
+  --bg-deep: #1a1d28;
+  --paper: #f2ede2;
+  --paper-soft: #ece4d6;
+  --text-main: #171824;
+  --text-sub: #353847;
+  --text-faint: #676a7d;
+  --accent: #2954f2;
+  --accent-2: #d0472d;
+  --accent-3: #f0b646;
+  --line: rgba(41, 84, 242, 0.28);
+  --orb-a: rgba(41, 84, 242, 0.18);
+  --orb-b: rgba(208, 71, 45, 0.17);
+  --cursor-ring-border: rgba(234, 238, 255, 0.76);
+  --cursor-ring-bg: rgba(234, 238, 255, 0.1);
+  --cursor-ring-glow: rgba(41, 84, 242, 0.42);
+  --cursor-ring-active: rgba(240, 182, 70, 0.92);
+  --cursor-ring-active-bg: rgba(240, 182, 70, 0.18);
+  --cursor-dot: #f8f1e4;
+  --cursor-dot-glow: rgba(240, 182, 70, 0.56);
+  --shadow: 0 20px 0 rgba(0, 0, 0, 0.36), 0 44px 74px rgba(0, 0, 0, 0.5);
+}
+
+html {
+  background:
+    radial-gradient(circle at 10% 14%, rgba(41, 84, 242, 0.18), transparent 30%),
+    radial-gradient(circle at 86% 8%, rgba(208, 71, 45, 0.2), transparent 34%),
+    radial-gradient(circle at 16% 90%, rgba(240, 182, 70, 0.14), transparent 30%),
+    linear-gradient(160deg, var(--bg-base), var(--bg-deep));
+}
+body {
+  color: var(--text-main);
+}
+body::before {
+  background:
+    radial-gradient(130% 96% at 0% 0%, rgba(41,84,242,0.1), transparent 60%),
+    radial-gradient(120% 100% at 100% 100%, rgba(208,71,45,0.1), transparent 68%);
+  mix-blend-mode: screen;
+}
+body::after {
+  background: radial-gradient(120% 100% at 50% 50%, transparent 56%, rgba(2, 5, 14, 0.56) 100%);
+}
+
+.slide::before,
+.slide::after {
+  filter: blur(9px);
+}
+
+@keyframes stageAura {
+  0%, 100% {
+    box-shadow:
+      var(--shadow),
+      inset 0 1px 0 rgba(255, 255, 255, 0.58),
+      inset 0 -2px 0 rgba(30, 33, 45, 0.2),
+      0 0 0 0 rgba(41, 84, 242, 0);
+  }
+  50% {
+    box-shadow:
+      var(--shadow),
+      inset 0 1px 0 rgba(255, 255, 255, 0.58),
+      inset 0 -2px 0 rgba(30, 33, 45, 0.2),
+      0 0 0 2px rgba(41, 84, 242, 0.22),
+      0 0 36px rgba(41, 84, 242, 0.12);
+  }
+}
+@keyframes dotPulse {
+  0%, 100% {
+    box-shadow:
+      0 0 0 6px rgba(41, 84, 242, 0.18),
+      0 0 0 0 rgba(41, 84, 242, 0.3);
+  }
+  50% {
+    box-shadow:
+      0 0 0 6px rgba(41, 84, 242, 0.18),
+      0 0 0 11px rgba(41, 84, 242, 0);
+  }
+}
+
+.stage {
+  border: 2px solid rgba(16, 19, 33, 0.16);
+  background:
+    var(--paper-noise),
+    linear-gradient(145deg, rgba(255,255,255,0.36), rgba(255,255,255,0) 42%),
+    radial-gradient(circle at var(--mx) var(--my), rgba(41,84,242,0.12), transparent 34%),
+    linear-gradient(180deg, rgba(244,238,227,0.97), rgba(238,230,216,0.95)),
+    var(--paper);
+  box-shadow:
+    var(--shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    inset 0 -2px 0 rgba(18, 21, 34, 0.16);
+  backdrop-filter: none;
+}
+.slide:nth-child(2n) .stage {
+  background:
+    var(--paper-noise),
+    linear-gradient(145deg, rgba(255,255,255,0.3), rgba(255,255,255,0) 40%),
+    radial-gradient(circle at var(--mx) var(--my), rgba(208,71,45,0.1), transparent 34%),
+    linear-gradient(180deg, rgba(244,238,227,0.97), rgba(238,230,216,0.95)),
+    var(--paper);
+}
+.slide:nth-child(3n) .stage {
+  border-color: rgba(208, 71, 45, 0.28);
+}
+.slide.visible .stage {
+  animation: stageAura 7.5s ease-in-out infinite;
+}
+.stage::after {
+  background: linear-gradient(90deg, rgba(41,84,242,0), rgba(41,84,242,0.85));
+}
+.stage::before {
+  border-color: rgba(41, 84, 242, 0.32);
+  box-shadow: inset 0 0 0 3px rgba(41, 84, 242, 0.07);
+  border-radius: 8px;
+}
+
+h1, h2, h3, p, li {
+  color: var(--text-main);
+}
+p, li {
+  color: var(--text-sub);
+}
+h2::after {
+  background: linear-gradient(90deg, rgba(41,84,242,0.94), rgba(240,182,70,0.86), rgba(208,71,45,0.86));
+}
+.slide:first-child h1 {
+  background: linear-gradient(114deg, #1e2550 8%, #2954f2 35%, #d0472d 68%, #f0b646 96%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.kicker {
+  border-color: rgba(41, 84, 242, 0.3);
+  background: linear-gradient(130deg, rgba(41,84,242,0.11), rgba(240,182,70,0.1));
+  color: #23388b;
+}
+
+.highlight {
+  color: #1f43c7;
+  text-shadow: 0 0 10px rgba(41, 84, 242, 0.16);
+}
+.muted {
+  color: var(--text-faint);
+}
+
+.card {
+  border: 1px solid rgba(23, 29, 49, 0.2);
+  background:
+    linear-gradient(150deg, rgba(255,255,255,0.68), rgba(245,236,221,0.8)),
+    var(--paper-soft);
+  box-shadow: 0 12px 24px rgba(10, 10, 17, 0.16);
+}
+.card::after {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.46), transparent);
+}
+.card:hover {
+  border-color: rgba(208, 71, 45, 0.5);
+  box-shadow:
+    0 18px 30px rgba(10, 10, 17, 0.22),
+    0 0 0 1px rgba(41, 84, 242, 0.16);
+}
+
+.pill {
+  border-color: rgba(41, 84, 242, 0.5);
+  color: #2343bf;
+  background: linear-gradient(140deg, rgba(41,84,242,0.09), rgba(240,182,70,0.08));
+}
+.quote {
+  border-left-color: #2f56d9;
+  color: #1e2232;
+  background: linear-gradient(90deg, rgba(41,84,242,0.11), rgba(41,84,242,0.01) 66%);
+}
+.code {
+  color: #eff3ff;
+  background: linear-gradient(180deg, #141c36, #10172c);
+  border-color: rgba(240, 182, 70, 0.46);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 12px 22px rgba(7, 10, 19, 0.32);
+}
+
+.evidence-chain .chain-step {
+  border-color: rgba(41, 84, 242, 0.33);
+  background: rgba(255, 250, 244, 0.84);
+  color: #1f2f74;
+  box-shadow: 0 10px 20px rgba(10, 10, 17, 0.16);
+}
+.evidence-chain .chain-link {
+  background: linear-gradient(90deg, rgba(41,84,242,0.26), rgba(208,71,45,0.78));
+}
+
+.progress-wrap {
+  background: rgba(41, 84, 242, 0.16);
+}
+.progress-bar {
+  background: linear-gradient(92deg, #2954f2, #f0b646, #d0472d);
+}
+.nav-dots button {
+  border-color: rgba(41, 84, 242, 0.28);
+  background: rgba(41, 84, 242, 0.22);
+}
+.nav-dots button.active {
+  border-color: rgba(41, 84, 242, 0.6);
+  background: linear-gradient(90deg, #2954f2, #d0472d);
+  box-shadow: 0 0 0 6px rgba(41, 84, 242, 0.14);
+}
+
+.counter {
+  color: #9ba1ba;
+}
+.transition-flash {
+  background:
+    radial-gradient(circle at 50% 50%, rgba(41, 84, 242, 0.24), transparent 42%),
+    radial-gradient(circle at 72% 24%, rgba(208, 71, 45, 0.22), transparent 36%),
+    radial-gradient(circle at 22% 78%, rgba(240, 182, 70, 0.18), transparent 34%);
+}
+.transition-sweep {
+  background:
+    linear-gradient(108deg,
+      transparent 20%,
+      rgba(255,255,255,0.12) 34%,
+      rgba(41,84,242,0.3) 45%,
+      rgba(240,182,70,0.3) 53%,
+      rgba(208,71,45,0.28) 61%,
+      transparent 78%);
+}
+
+.chapter-chip {
+  border-color: rgba(41, 84, 242, 0.44);
+  background: linear-gradient(130deg, rgba(248,242,232,0.92), rgba(240,231,216,0.76));
+  color: #26357e;
+}
+.brand-watermark {
+  color: rgba(24, 30, 54, 0.86);
+}
+.brand-watermark::after {
+  background: linear-gradient(90deg, rgba(24,30,54,0.5), rgba(24,30,54,0));
+}
+.brand-watermark::before {
+  border-color: rgba(24, 30, 54, 0.36);
+  box-shadow: inset 0 0 0 3px rgba(24, 30, 54, 0.08);
+}
+
+.speaker-view {
+  border-color: rgba(41, 84, 242, 0.34);
+  background: linear-gradient(145deg, rgba(16,22,38,0.94), rgba(20,28,46,0.88));
+  box-shadow: 0 20px 36px rgba(2, 5, 12, 0.6);
+}
+.speaker-title { color: #b6c8ff; }
+.speaker-box {
+  border-color: rgba(41, 84, 242, 0.24);
+  background: rgba(12, 18, 32, 0.68);
+}
+.speaker-label { color: #94a1c7; }
+.speaker-value { color: #e4ebff; }
+
+.editor-panel button {
+  border-color: rgba(41, 84, 242, 0.5);
+  background: rgba(10, 15, 28, 0.78);
+  color: #d1deff;
+}
+.editor-panel button:hover {
+  border-color: rgba(208, 71, 45, 0.76);
+}
+.editor-panel .active {
+  background: linear-gradient(120deg, #2954f2, #d0472d);
+  color: #f6f8ff;
+}
+
+.toast {
+  background: rgba(8, 12, 24, 0.94);
+  color: #e7eeff;
+  border: 1px solid rgba(41, 84, 242, 0.24);
+}
+.cursor-aura {
+  background:
+    radial-gradient(circle at 45% 45%, rgba(41,84,242,0.32), rgba(41,84,242,0.08) 40%, transparent 68%),
+    radial-gradient(circle at 62% 58%, rgba(208,71,45,0.22), transparent 62%);
+  mix-blend-mode: screen;
+}
+
+body.edit-mode [data-editable="true"] {
+  outline-color: rgba(41, 84, 242, 0.54);
+}
+body.edit-mode [data-editable="true"]:focus {
+  outline-color: rgba(41, 84, 242, 0.86);
+  background: rgba(41, 84, 242, 0.12);
+}
+.injected-image {
+  border-color: rgba(41, 84, 242, 0.36);
+  box-shadow: 0 14px 24px rgba(0, 8, 19, 0.36);
+}
+.ide-demo-thumb {
+  border-color: rgba(41, 84, 242, 0.44);
+  box-shadow: 0 14px 26px rgba(6, 12, 28, 0.3);
+}
+.ide-demo-thumb:hover {
+  border-color: rgba(208, 71, 45, 0.72);
+}
+.image-lightbox {
+  background: rgba(4, 8, 20, 0.8);
+}
+.image-lightbox img {
+  border-color: rgba(210, 223, 255, 0.42);
+}
+
+/* Clean Presentation Export */
+.editor-panel,
+.toast,
+#imagePicker {
+  display: none !important;
+}
+
+/* ============================
+   Enhancement 1: Part过渡页 深色沉浸
+   ============================ */
+.slide.part-transition {
+  background: none;
+}
+.slide.part-transition .stage {
+  background:
+    radial-gradient(ellipse 80% 60% at 30% 40%, rgba(14,122,117,0.28), transparent 65%),
+    radial-gradient(ellipse 60% 80% at 75% 65%, rgba(203,95,61,0.18), transparent 60%),
+    linear-gradient(145deg, #101e1d 0%, #0d1817 55%, #1a1008 100%);
+  border-color: rgba(14,122,117,0.22);
+  box-shadow:
+    0 40px 100px rgba(0,0,0,0.55),
+    inset 0 1px 0 rgba(14,122,117,0.22),
+    inset 0 0 80px rgba(14,122,117,0.06);
+}
+.slide.part-transition .kicker {
+  color: rgba(14,122,117,0.9);
+  border-color: rgba(14,122,117,0.35);
+  background: rgba(14,122,117,0.1);
+  letter-spacing: 0.18em;
+}
+.slide.part-transition h1 {
+  color: #f0ebe0;
+  font-size: clamp(2.4rem, 6vw, 5.2rem);
+  text-shadow: 0 2px 40px rgba(14,122,117,0.3);
+}
+/* 装饰横线 */
+.slide.part-transition .part-line {
+  width: clamp(40px, 6vw, 80px);
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), transparent);
+  margin: 0.8rem auto 0;
+}
+
+/* ============================
+   Enhancement 2: 代码块升级
+   ============================ */
+.code {
+  background:
+    linear-gradient(160deg, rgba(255,255,255,0.03), rgba(255,255,255,0)),
+    #0f1923;
+  border: 1px solid rgba(14,122,117,0.22);
+  border-left: 3px solid var(--accent);
+  border-radius: 10px;
+  padding: clamp(0.7rem, 1.4vw, 1.1rem) clamp(0.9rem, 1.8vw, 1.4rem);
+  font-family: var(--font-mono);
+  font-size: clamp(0.72rem, 1.15vw, 0.92rem);
+  color: #c8dbd8;
+  line-height: 1.85;
+  white-space: pre-wrap;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.04),
+    inset 0 -1px 0 rgba(0,0,0,0.2),
+    0 8px 24px rgba(0,0,0,0.18);
+  position: relative;
+  overflow: hidden;
+}
+.code::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, var(--accent), transparent 60%);
+  opacity: 0.6;
+}
+/* 关键词高亮 */
+.code .kw { color: #7dd3ca; font-weight: 600; }
+.code .str { color: #f0c070; }
+.code .comment { color: #4a6e69; font-style: italic; }
+
+/* ============================
+   Enhancement 3: 关键卡片差异化
+   ============================ */
+.card-highlight {
+  background:
+    linear-gradient(140deg, rgba(14,122,117,0.12), rgba(14,122,117,0.04));
+  border: 1.5px solid rgba(14,122,117,0.35) !important;
+  box-shadow:
+    0 8px 28px rgba(14,122,117,0.12),
+    inset 0 1px 0 rgba(14,122,117,0.15);
+}
+.card-highlight h3 {
+  color: var(--accent) !important;
+}
+.card-warning {
+  background:
+    linear-gradient(140deg, rgba(203,95,61,0.1), rgba(203,95,61,0.03));
+  border: 1.5px solid rgba(203,95,61,0.32) !important;
+  box-shadow:
+    0 8px 28px rgba(203,95,61,0.1),
+    inset 0 1px 0 rgba(203,95,61,0.12);
+}
+.card-warning h3 { color: var(--accent-2) !important; }
+
+/* ============================
+   Enhancement 4: 收尾页特殊背景
+   ============================ */
+.slide.takeaway-slide .stage {
+  background:
+    radial-gradient(ellipse 70% 55% at 20% 30%, rgba(14,122,117,0.14), transparent 65%),
+    radial-gradient(ellipse 50% 70% at 80% 75%, rgba(203,95,61,0.1), transparent 60%),
+    linear-gradient(158deg, rgba(255,255,255,0.97), rgba(255,255,255,0.90)),
+    var(--paper);
+  border-color: rgba(14,122,117,0.2);
+}
+.slide.takeaway-slide .quote {
+  font-size: clamp(1.8rem, 4.2vw, 3.4rem) !important;
+  line-height: 1.4 !important;
+  color: #0f1e1d;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.8);
+  letter-spacing: -0.01em;
+}
+.takeaway-rule {
+  width: clamp(32px, 5vw, 56px);
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  border-radius: 2px;
+  margin: 1.2rem auto 0;
+}
+.takeaway-steps {
+  font-size: clamp(0.9rem, 1.6vw, 1.15rem);
+  line-height: 2.2;
+  color: var(--text-sub);
+  margin-top: 1.6rem;
+}
+
+/* ============================
+   Enhancement 5: Q&A 页
+   ============================ */
+.slide.qa-slide .stage {
+  background:
+    radial-gradient(ellipse 90% 60% at 50% 20%, rgba(14,122,117,0.1), transparent 70%),
+    linear-gradient(175deg, rgba(255,255,255,0.96), rgba(255,255,255,0.88)),
+    var(--paper);
+}
+.qa-question {
+  font-size: clamp(1.1rem, 2.2vw, 1.7rem);
+  color: var(--text-main);
+  border-left: 3px solid var(--accent);
+  padding-left: 1rem;
+  text-align: left;
+  margin: 0 auto;
+  max-width: 600px;
+}
+</style>
+<style id="pdf-export-style">
+@media print {
+  @page { size: 13.333in 7.5in; margin: 0; }
+
+  html, body {
+    width: auto !important;
+    height: auto !important;
+    overflow: visible !important;
+    background: #0c1020 !important;
+  }
+
+  .progress-wrap,
+  .nav-dots,
+  .transition-flash,
+  .transition-sweep,
+  .cursor-aura,
+  .cursor-ring,
+  .cursor-dot,
+  .editor-panel,
+  .toast,
+  .speaker-view,
+  .image-lightbox,
+  #imagePicker {
+    display: none !important;
+  }
+
+  .deck {
+    display: block !important;
+    counter-reset: slideNo;
+  }
+
+  .slide {
+    counter-increment: slideNo;
+    position: relative !important;
+    width: 13.333in !important;
+    height: 7.5in !important;
+    min-height: 7.5in !important;
+    max-height: 7.5in !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    break-after: page !important;
+    page-break-after: always !important;
+    overflow: hidden !important;
+    scroll-snap-align: none !important;
+    perspective: none !important;
+  }
+
+  .slide:last-child {
+    break-after: auto !important;
+    page-break-after: auto !important;
+  }
+
+  .slide::before,
+  .slide::after {
+    display: block !important;
+    animation: none !important;
+    filter: none !important;
+    border-radius: 0 !important;
+    background: none !important;
+    pointer-events: none !important;
+    width: auto !important;
+    height: auto !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: auto !important;
+    z-index: 24 !important;
+  }
+
+  .slide::before {
+    content: counter(slideNo, decimal-leading-zero) " · " attr(data-title) !important;
+    top: 0.08in !important;
+    left: 0.18in !important;
+    padding: 0.08in 0.18in !important;
+    border-radius: 999px !important;
+    border: 1px solid rgba(41, 84, 242, 0.36) !important;
+    background: linear-gradient(120deg, rgba(255,255,255,0.92), rgba(239, 244, 255, 0.88)) !important;
+    color: #3f4a7d !important;
+    font-size: 11px !important;
+    font-family: "JetBrains Mono", "Noto Sans SC", sans-serif !important;
+    letter-spacing: 0.03em !important;
+  }
+
+  .slide::after {
+    content: "杜思敏  |  AI 岐路花园" !important;
+    top: 0.08in !important;
+    right: 0.18in !important;
+    padding: 0.08in 0.18in !important;
+    border-radius: 999px !important;
+    border: 1px solid rgba(41, 84, 242, 0.22) !important;
+    background: linear-gradient(120deg, rgba(255,255,255,0.94), rgba(239, 244, 255, 0.9)) !important;
+    box-shadow: 0 4px 14px rgba(20, 34, 58, 0.12) !important;
+    color: #3f4a7d !important;
+    font-size: 11px !important;
+    font-family: "Noto Sans SC", sans-serif !important;
+    letter-spacing: 0.06em !important;
+    white-space: nowrap !important;
+  }
+
+  .brand-watermark,
+  .chapter-chip,
+  .counter {
+    display: none !important;
+  }
+
+  .stage {
+    width: 12.95in !important;
+    height: 7.06in !important;
+    margin: 0.26in auto 0.18in auto !important;
+    zoom: 0.97 !important;
+    transform: none !important;
+    transform-origin: center center !important;
+    opacity: 1 !important;
+    animation: none !important;
+    will-change: auto !important;
+    box-shadow: none !important;
+  }
+
+  .slide[data-title="官方 Skills"] .stage {
+    zoom: 0.78 !important;
+    padding-top: 0.55rem !important;
+    padding-bottom: 0.9rem !important;
+    gap: 0.5rem !important;
+    position: relative !important;
+  }
+
+  .slide[data-title="官方 Skills"] .stage > p.reveal.muted[style*="--d:7"] {
+    display: none !important;
+  }
+
+  .slide[data-title="官方 Skills"] .stage::after {
+    content: "获取：claude.ai 设置 → Skills 直接开启 · 更多：claude.com/connectors · github.com/anthropics/skills" !important;
+    position: absolute !important;
+    left: 50% !important;
+    bottom: 0.18rem !important;
+    transform: translateX(-50%) !important;
+    width: 92% !important;
+    text-align: center !important;
+    font-size: 10px !important;
+    color: #6e7c83 !important;
+    background: none !important;
+    height: auto !important;
+    border: 0 !important;
+  }
+
+  .reveal,
+  .slide.step-reveal .reveal,
+  .slide.step-reveal.visible .reveal,
+  .slide.step-reveal.visible .reveal.revealed {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    transition: none !important;
+    animation: none !important;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+</style>
+<script>
+(() => {
+  const force = /(^|[?&])export=pdf(&|$)/.test(location.search);
+  if (!force) return;
+  const slides = [...document.querySelectorAll('.slide')];
+  slides.forEach((slide) => {
+    slide.classList.add('visible');
+    [...slide.querySelectorAll('.reveal')].forEach((el) => el.classList.add('revealed'));
+  });
+  document.documentElement.classList.add('pdf-export');
+})();
+</script>
+</head>
+<body>
+<div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
+<nav class="nav-dots" id="navDots" aria-label="Slide navigation"></nav>
+<div class="chapter-chip" id="chapterChip">01 · 封面</div>
+<div class="brand-watermark" id="brandWatermark" aria-hidden="true">
+  <span class="brand-main">杜思敏</span>
+  <span class="brand-sep">|</span>
+  <span class="brand-sub">AI 岐路花园</span>
+</div>
+<div class="counter" id="counter">01 / 23</div>
+<div class="transition-flash" id="transitionFlash"></div>
+<div class="transition-sweep" id="transitionSweep"></div>
+<div class="cursor-aura" id="cursorAura"></div>
+<div class="cursor-ring" id="cursorRing" aria-hidden="true"></div>
+<div class="cursor-dot" id="cursorDot" aria-hidden="true"></div>
+<div class="editor-panel" id="editorPanel">
+  <button type="button" id="editToggle" title="快捷键 E">编辑模式</button>
+  <button type="button" id="saveDraftBtn">保存草稿</button>
+  <button type="button" id="insertImageBtn">插入图片</button>
+  <button type="button" id="exportHtmlBtn">导出 HTML</button>
+  <button type="button" id="clearDraftBtn">清空草稿</button>
+</div>
+<input type="file" id="imagePicker" accept="image/*" hidden />
+<div class="toast" id="toast"></div>
+<div class="image-lightbox" id="imageLightbox" aria-hidden="true">
+  <img id="imageLightboxImg" alt="放大图预览">
+  <div class="image-lightbox-hint">点击任意位置关闭</div>
+</div>
+<aside class="speaker-view" id="speakerView" aria-hidden="true">
+  <div class="speaker-title">演讲者视图 · 按 P 开关</div>
+  <div class="speaker-box">
+    <div class="speaker-label">当前页</div>
+    <div class="speaker-value" id="speakerCurrent"></div>
+  </div>
+  <div class="speaker-box">
+    <div class="speaker-label">讲稿提示</div>
+    <div class="speaker-value" id="speakerNotes"></div>
+  </div>
+  <div class="speaker-box">
+    <div class="speaker-label">下一页预览</div>
+    <div class="speaker-value" id="speakerNext"></div>
+  </div>
+</aside>
+
+<main class="deck" id="deck">
+
+  <!-- ===== 封面 ===== -->
+  <section class="slide" data-title="封面" data-notes="深呼吸，看一眼全场，微笑。等大家安静下来再开口。开场不要急，第一句话说清楚就行。">
+    <div class="stage">
+      <div class="kicker reveal" style="--d:1">2026 · 大成</div>
+      <h1 class="reveal" style="--d:2; letter-spacing:-0.02em">律师的<br>AI 同事养成手册</h1>
+      <p class="reveal muted" style="--d:3">TRAE · Skills · MCP</p>
+      <div class="reveal" style="--d:4; display:flex; gap:0.8rem; flex-wrap:wrap; margin-top:0.4rem">
+        <span class="pill">杜思敏</span>
+        <span class="pill">大成（成都）</span>
+        <span class="pill">AI 歧路花园</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 自我介绍 ===== -->
+  <section class="slide" data-title="自我介绍" data-notes="这一页自己说，不要照着念。重点：我是做诉讼的律师，不是工程师，这些工具都是在真实工作里用下来的。公众号AI歧路花园记录真实折腾过程。今天分享的就是这些真实经历，不是教程，是踩坑报告。">
+    <div class="stage">
+      <div class="kicker reveal" style="--d:1">关于我</div>
+      <h2 class="reveal" style="--d:2">杜思敏</h2>
+      <ul style="margin-top:1.2rem; padding-left:1.2rem; font-size:clamp(1rem,2vw,1.3rem); line-height:2.2; list-style:none">
+        <li class="reveal" style="--d:3">大成（成都）分所</li>
+        <li class="reveal" style="--d:4">民商事争议解决律师，矿业律师，AI行业研究。</li>
+        <li class="reveal" style="--d:5">公众号「AI 歧路花园」作者，AI lawyer exploring scaling law</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ===== 破冰问题 ===== -->
+  <section class="slide" data-title="破冰" data-notes="停顿三秒，让大家真的去想。不要自己接着说。等有人开始小声讨论，再继续。">
+    <div class="stage" style="justify-content:center; text-align:center">
+      <div class="quote reveal" style="--d:1; font-size:clamp(1.6rem,3.6vw,2.8rem); line-height:1.5; letter-spacing:-0.01em">
+        上一次你用 AI 处理工作，<br>在哪里遇到了挫败感？
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 门槛在被抹平 ===== -->
+  <section class="slide" data-title="门槛在被抹平" data-notes="这是今天的背景板，不要讲太长。核心逻辑：每一次工具升级，都在重新划定谁能进这个行业。Cursor让非程序员写代码，Lovable让非设计师做产品，下一个被重新定义的是法律服务——不是律师被替代，而是客户接触法律的门槛在降低。Anthropic报告那句可以直接念：法律行业在可替代性排名里名列前茅，原因很直白：高度依赖逻辑推理+强文本表达，恰好是大语言模型最擅长的两件事。然后说：所以我们今天在这里不是赶时髦，是在真正面对一件正在发生的事。">
+    <div class="stage">
+      <div class="kicker reveal" style="--d:1">背景</div>
+      <h2 class="reveal" style="--d:2">每一次工具升级，都在重新划定门槛</h2>
+      <div class="grid-2" style="margin-top:1rem; grid-template-columns:repeat(3,1fr)">
+        <div class="card reveal" style="--d:3">
+          <h3>Cursor</h3>
+          <p>为程序员而生<br>↓<br>非程序员开始写代码</p>
+        </div>
+        <div class="card reveal" style="--d:4">
+          <h3>Lovable</h3>
+          <p>为设计师而生<br>↓<br>非设计师开始做产品</p>
+        </div>
+        <div class="card card-highlight reveal" style="--d:5">
+          <h3>法律服务</h3>
+          <p>逻辑推理 + 文本表述<br>↓<br>大语言模型最擅长的两件事</p>
+        </div>
+      </div>
+      <p class="reveal muted" style="--d:6">Anthropic 职业替代报告：法律行业名列前茅。不是危言耸听，是正在发生的事。</p>
+    </div>
+  </section>
+
+  <!-- ===== 三个天花板 ===== -->
+  <section class="slide" data-title="三个天花板" data-notes="重点讲第三个——经验归零。前两个大家能感同身受，第三个最容易被忽视，但对律师来说伤害最深。这一页说完，可以问：这三个有没有你特别有感触的？">
+    <div class="stage">
+      <div class="kicker reveal" style="--d:1">Problem</div>
+      <h2 class="reveal" style="--d:2">对话框模式的三个天花板</h2>
+      <div class="grid-2" style="grid-template-columns:repeat(3,1fr)">
+        <div class="card reveal" style="--d:3">
+          <h3>文件孤岛</h3>
+          <p>材料在桌面，AI 在浏览器第八个标签。碳基生物沦为搬运工。</p>
+        </div>
+        <div class="card reveal" style="--d:4">
+          <h3>流程断点</h3>
+          <p>一问一答，没有记忆。多步骤任务做着做着就断了。</p>
+        </div>
+        <div class="card reveal" style="--d:5">
+          <h3>经验归零</h3>
+          <p>今天的指令，明天关掉就没了。专业积累没有真正 AI 化。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 今天解决的路线 ===== -->
+  <section class="slide" data-title="今天的路线" data-notes="用手指着箭头讲。每个节点一句话：IDE解决第一个天花板，Skills解决第三个，MCP扩展了IDE的边界。这页讲完直接进Part 1，不要多解释。">
+    <div class="stage" style="justify-content:center; text-align:center">
+      <div class="kicker reveal" style="--d:1">AI 同事如何养成</div>
+      <div class="reveal" style="--d:2; display:flex; align-items:center; gap:1rem; flex-wrap:wrap; justify-content:center; margin:2rem 0; font-size:clamp(1rem,2.2vw,1.5rem); font-family:var(--font-display)">
+        <span class="pill" style="font-size:inherit; padding:0.5rem 1.2rem">对话框</span>
+        <span style="color:var(--text-faint)">→</span>
+        <span class="pill" style="font-size:inherit; padding:0.5rem 1.2rem; background:var(--accent); color:#fff">IDE</span>
+        <span style="color:var(--text-faint)">→</span>
+        <span class="pill" style="font-size:inherit; padding:0.5rem 1.2rem; background:var(--accent); color:#fff">Skills</span>
+        <span style="color:var(--text-faint)">→</span>
+        <span class="pill" style="font-size:inherit; padding:0.5rem 1.2rem; background:var(--accent); color:#fff">MCP</span>
+      </div>
+      <p class="reveal muted" style="--d:3">把 AI 同事请进办公室，配置技能，备好工作资源。工具：TRAE。</p>
+    </div>
+  </section>
+
+  <!-- ===== PART 1 过渡 ===== -->
+  <section class="slide part-transition" data-title="Part 1" data-notes="换一个语气，稍微正式一点点。说：好，现在进入第一部分。">
+    <div class="stage" style="justify-content:center; text-align:center">
+      <div class="kicker reveal" style="--d:1">Part 1</div>
+      <h1 class="reveal" style="--d:2">IDE<br>AI 同事的办公室</h1>
+      <div class="part-line reveal" style="--d:3"></div>
+      <div class="reveal" style="--d:4; display:flex; gap:1rem; justify-content:center; margin-top:1.2rem; flex-wrap:wrap">
+        <div style="background:rgba(14,122,117,0.18); border:1.5px solid rgba(14,122,117,0.45); border-radius:10px; padding:0.55rem 1.2rem; text-align:center; min-width:120px">
+          <div style="font-size:clamp(0.9rem,1.6vw,1.1rem); font-weight:700; color:#e8f4f3">TRAE</div>
+          <div style="font-size:clamp(0.65rem,1vw,0.78rem); color:rgba(14,122,117,0.9); margin-top:0.2rem">今天讲这个 · 字节出品 · 国内免费用</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.18); border-radius:10px; padding:0.55rem 1.2rem; text-align:center; min-width:120px">
+          <div style="font-size:clamp(0.9rem,1.6vw,1.1rem); font-weight:700; color:rgba(240,235,224,0.7)">Cursor</div>
+          <div style="font-size:clamp(0.65rem,1vw,0.78rem); color:rgba(255,255,255,0.4); margin-top:0.2rem">程序员首选 · 全球最出名</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.18); border-radius:10px; padding:0.55rem 1.2rem; text-align:center; min-width:120px">
+          <div style="font-size:clamp(0.9rem,1.6vw,1.1rem); font-weight:700; color:rgba(240,235,224,0.7)">VS Code</div>
+          <div style="font-size:clamp(0.65rem,1vw,0.78rem); color:rgba(255,255,255,0.4); margin-top:0.2rem">微软出品 · 最广泛使用</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== IDE 是什么 ===== -->
+  <section class="slide" data-title="TRAE 是什么" data-notes="左边那张对比卡片是重点。核心缺陷是：你在两个不同的空间里工作。IDE把它合并了。这里展示VS Code截图，边说边指：左边文件夹，右边对话窗口，下面是命令行，AI就在这个工作现场里。">
+    <div class="stage">
+      <div class="kicker reveal" style="--d:1">定义</div>
+      <h2 class="reveal" style="--d:2">TRAE = 把你的文件和 AI 放在同一个房间</h2>
+      <div class="grid-2" style="margin-top:1rem">
+        <div class="card card-warning reveal" style="--d:3">
+          <h3>对话框模式</h3>
+          <p>文件在本地 / AI 在网页 / 你来回搬运</p>
+        </div>
+        <div class="card reveal" style="--d:4; border-left:3px solid var(--accent)">
+          <h3 style="color:var(--accent)">TRAE 模式</h3>
+          <p>文件夹 + 编辑器 + AI<br>全在一个窗口 · 字节跳动出品 · 国内直接用</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== #上下文 ===== -->
+  <section class="slide" data-title="#上下文" data-notes="在对话框里输入 # 号，弹出菜单选文件或文件夹。这是演示页，把两个代码块都念一遍，节奏慢一点。重点：不需要手动打开文件，不需要复制，直接告诉AI看哪里。">
+    <div class="stage">
+      <div class="kicker reveal" style="--d:1">核心操作</div>
+      <h2 class="reveal" style="--d:2"># 号 · 告诉 AI 看哪里</h2>
+      <div class="code reveal" style="--d:3"># 合同A.docx  # 合同B.docx
+对比两份合同在违约责任条款上的差异
+立场：甲方 · 输出：风险等级表（高/中/低）</div>
+      <div class="code reveal" style="--d:4"># /cases 文件夹
+读取里面所有判决书
+提取：争议焦点 · 裁判理由 · 判决结果
+分组：支持 / 驳回 · 生成：类案分析报告.docx</div>
+      <p class="reveal muted" style="--d:5">AI 直接读取文件，处理文件，生成文件，写入文件夹，丝滑沉浸办公。</p>
+    </div>
+  </section>
+
+  <!-- ===== TRAE 内置模型选择 ===== -->
+  <section class="slide" data-title="选哪个模型" data-notes="这一页快速过，不要逐个念。按 2026-03 官方公告和官方模型选择指南，旧页里最需要更新的是模型代际：GLM-4.7 可以整体换成 GLM-5，Qwen-3-Coder 已经替换为 Qwen-3-Coder-Next，MiniMax 最新已经上新到 M2.7。实用结论：Doubao-Seed-2.0-Code 还是 TRAE 日常默认首选；海量文本和长附件看 Kimi-K2.5 / Qwen3.5-Plus；复杂规划看 GLM-5；多步骤自动化看 MiniMax-M2.7。">
+    <div class="stage" style="padding:clamp(1rem,2.2vw,1.8rem)">
+      <div class="kicker reveal" style="--d:1">模型选择指南 · 2026-03 更新</div>
+      <h2 class="reveal" style="--d:2; margin-bottom:0.6rem">TRAE 中国版常用内置模型 · 按官方场景来选</h2>
+
+      <!-- 场景推荐表 -->
+      <div class="reveal" style="--d:3; display:grid; grid-template-columns:1fr 1fr; gap:0.7rem; margin-bottom:0.8rem">
+
+        <!-- 左列 -->
+        <div style="display:flex; flex-direction:column; gap:0.55rem">
+
+          <div style="background:linear-gradient(135deg,rgba(14,122,117,0.07),rgba(14,122,117,0.02)); border:1px solid rgba(14,122,117,0.22); border-radius:10px; padding:0.65rem 0.9rem; display:flex; align-items:flex-start; gap:0.6rem">
+            <span style="font-size:1.15rem; line-height:1.3; flex-shrink:0">✍️</span>
+            <div>
+              <div style="font-weight:700; font-size:clamp(0.75rem,1.1vw,0.9rem); color:var(--text-main)">文书写作 · 长文档处理</div>
+              <div style="font-size:clamp(0.68rem,0.95vw,0.8rem); color:var(--accent); margin-top:0.15rem; font-weight:600">Kimi-K2.5 / Qwen3.5-Plus</div>
+              <div style="font-size:clamp(0.62rem,0.88vw,0.74rem); color:var(--text-faint); margin-top:0.1rem">海量文本、多文件、长附件更合适；整案卷、合同包、标书先读透</div>
+            </div>
+          </div>
+
+          <div style="background:linear-gradient(135deg,rgba(203,95,61,0.07),rgba(203,95,61,0.02)); border:1px solid rgba(203,95,61,0.2); border-radius:10px; padding:0.65rem 0.9rem; display:flex; align-items:flex-start; gap:0.6rem">
+            <span style="font-size:1.15rem; line-height:1.3; flex-shrink:0">🧮</span>
+            <div>
+              <div style="font-weight:700; font-size:clamp(0.75rem,1.1vw,0.9rem); color:var(--text-main)">逻辑推理 · 法律分析</div>
+              <div style="font-size:clamp(0.68rem,0.95vw,0.8rem); color:var(--accent-2); margin-top:0.15rem; font-weight:600">GLM-5 / Qwen3.5-Plus</div>
+              <div style="font-size:clamp(0.62rem,0.88vw,0.74rem); color:var(--text-faint); margin-top:0.1rem">复杂问题拆解更稳；适合先做分析框架，再落到文书表达</div>
+            </div>
+          </div>
+
+          <div style="background:linear-gradient(135deg,rgba(14,122,117,0.07),rgba(14,122,117,0.02)); border:1px solid rgba(14,122,117,0.22); border-radius:10px; padding:0.65rem 0.9rem; display:flex; align-items:flex-start; gap:0.6rem">
+            <span style="font-size:1.15rem; line-height:1.3; flex-shrink:0">🖼️</span>
+            <div>
+              <div style="font-weight:700; font-size:clamp(0.75rem,1.1vw,0.9rem); color:var(--text-main)">图片识别 · 扫描件 · 表格</div>
+              <div style="font-size:clamp(0.68rem,0.95vw,0.8rem); color:var(--accent); margin-top:0.15rem; font-weight:600">Doubao-Seed-2.0-Code / Kimi-K2.5</div>
+              <div style="font-size:clamp(0.62rem,0.88vw,0.74rem); color:var(--text-faint); margin-top:0.1rem">Doubao 视觉 / OCR 更强；Kimi 多模态升级后读截图、扫描件也稳</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 右列 -->
+        <div style="display:flex; flex-direction:column; gap:0.55rem">
+
+          <div style="background:linear-gradient(135deg,rgba(14,122,117,0.12),rgba(14,122,117,0.04)); border:1.5px solid rgba(14,122,117,0.32); border-radius:10px; padding:0.65rem 0.9rem; display:flex; align-items:flex-start; gap:0.6rem">
+            <span style="font-size:1.15rem; line-height:1.3; flex-shrink:0">⚡</span>
+            <div>
+              <div style="font-weight:700; font-size:clamp(0.75rem,1.1vw,0.9rem); color:var(--accent)">代码任务 · TRAE 日常首选</div>
+              <div style="font-size:clamp(0.68rem,0.95vw,0.8rem); color:var(--accent); margin-top:0.15rem; font-weight:700">Doubao-Seed-2.0-Code ★ / Qwen-3-Coder-Next</div>
+              <div style="font-size:clamp(0.62rem,0.88vw,0.74rem); color:var(--text-faint); margin-top:0.1rem">Doubao 默认优先试；Qwen-3-Coder-Next 是旧版 Qwen-3-Coder 的正式替代</div>
+            </div>
+          </div>
+
+          <div style="background:linear-gradient(135deg,rgba(14,122,117,0.07),rgba(14,122,117,0.02)); border:1px solid rgba(14,122,117,0.22); border-radius:10px; padding:0.65rem 0.9rem; display:flex; align-items:flex-start; gap:0.6rem">
+            <span style="font-size:1.15rem; line-height:1.3; flex-shrink:0">🤖</span>
+            <div>
+              <div style="font-weight:700; font-size:clamp(0.75rem,1.1vw,0.9rem); color:var(--text-main)">复杂 Agent · 多步骤自动化</div>
+              <div style="font-size:clamp(0.68rem,0.95vw,0.8rem); color:var(--accent); margin-top:0.15rem; font-weight:600">GLM-5 / MiniMax-M2.7</div>
+              <div style="font-size:clamp(0.62rem,0.88vw,0.74rem); color:var(--text-faint); margin-top:0.1rem">GLM 的 Agentic 能力更强；MiniMax 在复杂办公自动化和多 Agent 协作更稳</div>
+            </div>
+          </div>
+
+          <div style="background:linear-gradient(135deg,rgba(240,161,74,0.08),rgba(240,161,74,0.02)); border:1px solid rgba(240,161,74,0.28); border-radius:10px; padding:0.65rem 0.9rem; display:flex; align-items:flex-start; gap:0.6rem">
+            <span style="font-size:1.15rem; line-height:1.3; flex-shrink:0">🏃</span>
+            <div>
+              <div style="font-weight:700; font-size:clamp(0.75rem,1.1vw,0.9rem); color:var(--text-main)">搜索 · 办公任务 · 快速试跑</div>
+              <div style="font-size:clamp(0.68rem,0.95vw,0.8rem); color:var(--accent-3); margin-top:0.15rem; font-weight:600">MiniMax-M2.7 / Qwen3.5-Plus</div>
+              <div style="font-size:clamp(0.62rem,0.88vw,0.74rem); color:var(--text-faint); margin-top:0.1rem">MiniMax 官方介绍已覆盖搜索/办公；Qwen 做长文本和知识任务也稳</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 底部说明条 -->
+      <div class="reveal" style="--d:4; background:rgba(14,122,117,0.05); border:1px solid rgba(14,122,117,0.15); border-radius:8px; padding:0.5rem 1rem; display:flex; align-items:center; gap:0.8rem; font-size:clamp(0.62rem,0.9vw,0.76rem); color:var(--text-sub)">
+        <span style="color:var(--accent); font-weight:700; white-space:nowrap">💡 实用原则</span>
+        <span>按 2026-03 官方公告：<strong style="color:var(--accent)">GLM-4.7 → GLM-5</strong>，<strong style="color:var(--accent)">Qwen-3-Coder → Qwen-3-Coder-Next</strong>，<strong style="color:var(--accent)">MiniMax-M2.5 → MiniMax-M2.7</strong>；<strong style="color:var(--accent)">Kimi-K2.5</strong> 也仍在中国版内置。</span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===== Coding Agent 底层逻辑 ===== -->
+  <section class="slide" data-title="为什么更靠谱" data-notes="法律逻辑和代码逻辑同构这一点要重点说。停下来问：法律条文其实就是在写程序？如果A且B，则C——这和代码里的if语句完全一样。这不是比喻，是真实的同构关系。TRAE背后跑的是同样的Coding Agent逻辑，只是换成了图形界面操作。">
+    <div class="stage">
+      <div class="kicker reveal" style="--d:1">底层逻辑</div>
+      <h2 class="reveal" style="--d:2">闭环 vs 开环</h2>
+      <div class="grid-2">
+        <div class="card reveal" style="--d:3; border-left:3px solid var(--accent-2)">
+          <h3 style="color:var(--accent-2)">Chatbot · 开环</h3>
+          <p>说完就完了。不知道自己对不对，没有反馈，没有纠错。</p>
+        </div>
+        <div class="card reveal" style="--d:4; border-left:3px solid var(--accent)">
+          <h3 style="color:var(--accent)">Coding Agent · 闭环</h3>
+          <p>推理 → 行动 → 观察报错 → 修正 → 再循环</p>
+        </div>
+      </div>
+      <div class="quote reveal" style="--d:5; font-size:var(--body-size); margin-top:1rem">
+        法律条文 = 用人类语言写的程序：「如果 A 且 B，则执行 C」= <span style="font-family:var(--font-mono)">if (A &amp;&amp; B) &#123; execute(C); &#125;</span><br>
+        法律逻辑与代码逻辑天然同构。
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CO-STAR ===== -->
+  <section class="slide" data-title="CO-STAR 提示词框架" data-notes="六个维度不要一个个解释，直接说：当AI给你的结果不满意时，回来对着这张表找问题。通常是Context太模糊或者Response Format没说清楚。举例对比：帮我看看这个合同 vs 审查这份建设工程施工合同，站在发包方立场，识别风险条款——差别就在这里。">
+    <div class="stage">
+      <div class="kicker reveal" style="--d:1">Prompt</div>
+      <h2 class="reveal" style="--d:2">CO-STAR 框架</h2>
+      <div class="grid-2" style="grid-template-columns:repeat(3,1fr); gap:0.6rem">
+        <div class="card reveal" style="--d:3; padding:0.7rem 1rem"><h3>C · Context</h3><p>背景：你是谁，在做什么</p></div>
+        <div class="card reveal" style="--d:3; padding:0.7rem 1rem"><h3>O · Objective</h3><p>目标：具体要完成什么</p></div>
+        <div class="card reveal" style="--d:4; padding:0.7rem 1rem"><h3>S · Style</h3><p>风格：意见书 or 白话摘要</p></div>
+        <div class="card reveal" style="--d:4; padding:0.7rem 1rem"><h3>T · Tone</h3><p>语气：对法官 / 客户 / 对方</p></div>
+        <div class="card reveal" style="--d:5; padding:0.7rem 1rem"><h3>A · Audience</h3><p>受众：法院 / 客户 / 内部</p></div>
+        <div class="card reveal" style="--d:5; padding:0.7rem 1rem"><h3>R · Response</h3><p>格式：表格 / 条文 / docx</p></div>
+      </div>
+      <p class="reveal muted" style="--d:6">输出不满意时，对着这六个维度找问题。</p>
+    </div>
+  </section>
+
+  <!-- ===== TRAE Rules ===== -->
+  <section class="slide" data-title="TRAE Rules" data-notes="核心：写一次，永久生效。个人规则写工作偏好，项目规则写案件信息。展示代码块的时候说：这不是代码，就是写字。它解决的就是第三个天花板：经验归零。TRAE里设置Rules：点右上角设置图标→规则→写进去保存。">
+    <div class="stage">
+      <div class="kicker reveal" style="--d:1">解决第三个天花板</div>
+      <h2 class="reveal" style="--d:2">TRAE Rules · 给 AI 的永久工作说明书</h2>
+      <p class="reveal" style="--d:3">在 TRAE 右上角设置 → 规则，写好之后每次打开自动生效，不需要重新交代背景。</p>
+      <div class="code reveal" style="--d:4; font-size:clamp(0.65rem,1.1vw,0.88rem)">## 我的身份
+我是执业律师，主要做民商事诉讼。
+
+## 默认立场
+除非特别说明，分析均从委托方角度出发。
+
+## 输出要求
+- 法律文书输出为 Word 格式（.docx）
+- 法条引用需注明具体条款，如「《民法典》第502条」
+- 分析结论后注明：以上内容须经执业律师审核后使用</div>
+      <p class="reveal muted" style="--d:5">个人规则写工作偏好（全局生效）· 项目规则写案件信息（仅当前文件夹）</p>
+    </div>
+  </section>
+
+  <!-- ===== PART 2 过渡 ===== -->
+  <section class="slide part-transition" data-title="Part 2" data-notes="换个节奏。说：刚才讲完了工作现场，现在讲怎么把你的专业积累装进这个现场。">
+    <div class="stage" style="justify-content:center; text-align:center">
+      <div class="kicker reveal" style="--d:1">Part 2</div>
+      <h1 class="reveal" style="--d:2">Skills<br>把经验封装成永久资产</h1>
+      <div class="part-line reveal" style="--d:3"></div>
+    </div>
+  </section>
+
+  <!-- ===== Skills 定义 ===== -->
+  <section class="slide" data-title="Skills 是什么" data-notes="把官方引用念一遍，然后翻译：Skill就是你给AI写的操作手册。不是代码，不是程序，就是Markdown文件，就是写字。法律人最擅长写清楚东西，所以这件事你们比大多数人更容易做好。">
+    <div class="stage">
+      <div class="kicker reveal" style="--d:1">官方定义</div>
+      <h2 class="reveal" style="--d:2">Skill = 给 AI 的可复用操作手册</h2>
+      <div class="quote reveal" style="--d:3; font-size:var(--body-size); font-style:italic; color:var(--text-sub)">
+        "Skills teach Claude how to complete specific tasks in a repeatable way, whether that's creating documents with your company's brand guidelines, analyzing data using your organization's specific workflows, or automating personal tasks."
+        <span style="display:block; margin-top:0.4rem; font-style:normal; color:var(--text-faint)">— Anthropic 官方文档 · github.com/anthropics/skills</span>
+      </div>
+      <p class="reveal" style="--d:4; margin-top:1rem">元数据决定它<span class="highlight">什么时候出场</span>，正文决定它<span class="highlight">怎么干活</span>。</p>
+      <p class="reveal muted" style="--d:5">Skill = 结构化提示词 + 工作流描述 + 封装。SKILL.md 就是一个普通的 Markdown 文件。</p>
+    </div>
+  </section>
+
+  <!-- ===== SKILL.md 结构 ===== -->
+  <section class="slide" data-title="SKILL.md 结构" data-notes="核心展示页，节奏放慢。先指着顶部YAML说：这几行告诉AI什么时候调用这个Skill。再指着下面正文说：这就是操作手册。然后说：这不是代码，是一个普通的Markdown文件，就是在写字。你今天回去，花20分钟，就能做出第一个自己的Skill。">
+    <div class="stage">
+      <div class="kicker reveal" style="--d:1">文件结构</div>
+      <h2 class="reveal" style="--d:2">一个 SKILL.md 长什么样</h2>
+      <div class="code reveal" style="--d:3; font-size:clamp(0.62rem,1.05vw,0.85rem)">---
+name: 诉讼管家
+description: 处理民事诉讼文书，自动计算答辩期、举证期、
+  上诉期，生成期间表和待办提醒。
+trigger_keywords: [开庭通知, 答辩期, 举证期限, 上诉期]
+---
+
+# 诉讼管家
+
+当用户@一份法院文书并提到「诉讼管家」时，执行：
+
+1. 识别文书类型（传票 / 开庭通知 / 判决书）
+2. 提取送达日期和关键时间点
+3. 依据《民事诉讼法》（2023年修正）计算各项期限
+4. 生成期间表，保存至文书同一文件夹
+5. 将所有期限写入 tasks.json 待办中心
+
+注：计算结果用于提醒，以法院文书载明日期为准。</div>
+      <p class="reveal muted" style="--d:4">文件夹结构：my-skill/ ├── SKILL.md （必须）└── scripts/ （可选配套脚本）</p>
+    </div>
+  </section>
+
+  <!-- ===== Skill 设计灵感 ===== -->
+  <section class="slide" data-title="Skill 设计灵感" data-notes="这一页放慢节奏，让大家在心里找共鸣。不要逐条念，挑两三条说。核心：你心里现在有没有浮现出一件具体的事？那就是你第一个 Skill 的候选。然后说：我之前帮一位律师梳理了一版全流程的 Skill 清单，这是里面的一部分，今天带大家看看，感受一下方向。">
+    <div class="stage" style="padding:clamp(1rem,2.2vw,1.8rem)">
+      <div class="kicker reveal" style="--d:1">Skill 设计灵感 · 律师全流程</div>
+      <h2 class="reveal" style="--d:2">从这些地方找你的第一个 Skill</h2>
+      <div class="reveal" style="--d:3; display:grid; grid-template-columns:1fr 1fr 1fr; gap:0.55rem; margin-top:0.6rem">
+
+        <!-- 收案阶段 -->
+        <div style="background:rgba(14,122,117,0.06); border:1px solid rgba(14,122,117,0.18); border-radius:10px; padding:0.6rem 0.75rem">
+          <div style="font-size:clamp(0.7rem,1vw,0.8rem); font-weight:700; color:var(--accent); margin-bottom:0.35rem; letter-spacing:0.06em">📋 收案阶段</div>
+          <ul style="list-style:none; padding:0; margin:0; font-size:clamp(0.62rem,0.88vw,0.73rem); color:var(--text-sub); line-height:1.9">
+            <li>• 案件信息采集表生成器</li>
+            <li>• 案件可行性初评</li>
+            <li>• 利益冲突检查</li>
+          </ul>
+        </div>
+
+        <!-- 证据整理 -->
+        <div style="background:rgba(14,122,117,0.06); border:1px solid rgba(14,122,117,0.18); border-radius:10px; padding:0.6rem 0.75rem">
+          <div style="font-size:clamp(0.7rem,1vw,0.8rem); font-weight:700; color:var(--accent); margin-bottom:0.35rem; letter-spacing:0.06em">🗂️ 证据整理</div>
+          <ul style="list-style:none; padding:0; margin:0; font-size:clamp(0.62rem,0.88vw,0.73rem); color:var(--text-sub); line-height:1.9">
+            <li>• 证据目录生成器</li>
+            <li>• 证据与待证事实对应分析</li>
+            <li>• 电子证据合法性核查</li>
+          </ul>
+        </div>
+
+        <!-- 起诉立案 -->
+        <div style="background:rgba(203,95,61,0.06); border:1px solid rgba(203,95,61,0.18); border-radius:10px; padding:0.6rem 0.75rem">
+          <div style="font-size:clamp(0.7rem,1vw,0.8rem); font-weight:700; color:var(--accent-2); margin-bottom:0.35rem; letter-spacing:0.06em">⚖️ 起诉 · 立案</div>
+          <ul style="list-style:none; padding:0; margin:0; font-size:clamp(0.62rem,0.88vw,0.73rem); color:var(--text-sub); line-height:1.9">
+            <li>• 诉讼请求拟定助手</li>
+            <li style="color:var(--accent-2); font-weight:600">• 期限自动计算 ★执业安全</li>
+            <li>• 保全申请材料包</li>
+          </ul>
+        </div>
+
+        <!-- 庭前准备 -->
+        <div style="background:rgba(14,122,117,0.06); border:1px solid rgba(14,122,117,0.18); border-radius:10px; padding:0.6rem 0.75rem">
+          <div style="font-size:clamp(0.7rem,1vw,0.8rem); font-weight:700; color:var(--accent); margin-bottom:0.35rem; letter-spacing:0.06em">🎯 庭前准备</div>
+          <ul style="list-style:none; padding:0; margin:0; font-size:clamp(0.62rem,0.88vw,0.73rem); color:var(--text-sub); line-height:1.9">
+            <li>• 代理意见框架生成器</li>
+            <li>• 对方策略预判</li>
+            <li>• 庭审提纲生成器</li>
+          </ul>
+        </div>
+
+        <!-- 客户沟通 -->
+        <div style="background:rgba(203,95,61,0.06); border:1px solid rgba(203,95,61,0.18); border-radius:10px; padding:0.6rem 0.75rem">
+          <div style="font-size:clamp(0.7rem,1vw,0.8rem); font-weight:700; color:var(--accent-2); margin-bottom:0.35rem; letter-spacing:0.06em">💬 客户沟通</div>
+          <ul style="list-style:none; padding:0; margin:0; font-size:clamp(0.62rem,0.88vw,0.73rem); color:var(--text-sub); line-height:1.9">
+            <li>• 阶段工作汇报生成</li>
+            <li style="color:var(--accent-2); font-weight:600">• 重要节点告知书 ★保护自己</li>
+            <li>• 律师函起草</li>
+          </ul>
+        </div>
+
+        <!-- 结案归档 -->
+        <div style="background:rgba(14,122,117,0.06); border:1px solid rgba(14,122,117,0.18); border-radius:10px; padding:0.6rem 0.75rem">
+          <div style="font-size:clamp(0.7rem,1vw,0.8rem); font-weight:700; color:var(--accent); margin-bottom:0.35rem; letter-spacing:0.06em">📁 结案 · 归档</div>
+          <ul style="list-style:none; padding:0; margin:0; font-size:clamp(0.62rem,0.88vw,0.73rem); color:var(--text-sub); line-height:1.9">
+            <li>• 结案小结生成器</li>
+            <li>• 类案检索提炼</li>
+            <li>• 合同风险逐条标注</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== TRAE 里怎么用 Skill ===== -->
+  <section class="slide" data-title="TRAE 里怎么用 Skill" data-notes="先说清楚 TRAE 用 Skill 和 Claude Code 完全一样的格式，不需要重新学。然后讲两种调用方式，显性调用最简单——直接说「用合同审查 Skill 帮我看这份合同」。最后说 Skill 和 MCP 的关系——Skill 负责告诉 AI 怎么做，MCP 负责给 AI 用的工具，两个可以叠加用。">
+    <div class="stage" style="padding:clamp(1rem,2.2vw,1.8rem)">
+      <div class="kicker reveal" style="--d:1">在 TRAE 里使用</div>
+      <h2 class="reveal" style="--d:2">Skill · MCP · 智能体——三者的关系</h2>
+      <div class="grid-2" style="margin-top:0.8rem">
+
+        <div style="display:flex; flex-direction:column; gap:0.6rem">
+          <div class="card reveal" style="--d:3">
+            <h3 style="color:var(--accent)">TRAE 怎么放 Skill</h3>
+            <p style="font-size:var(--small-size)">两层结构：</p>
+            <div style="margin-top:0.4rem; display:flex; flex-direction:column; gap:0.25rem; font-size:var(--small-size)">
+              <div style="background:rgba(14,122,117,0.08); border-radius:5px; padding:0.25rem 0.5rem">
+                <strong>全局 Skill</strong>：跨项目生效，放通用工作偏好
+              </div>
+              <div style="background:rgba(14,122,117,0.08); border-radius:5px; padding:0.25rem 0.5rem">
+                <strong>项目 Skill</strong>：仅当前文件夹生效，放案件专属规则
+              </div>
+            </div>
+          </div>
+          <div class="card reveal" style="--d:4">
+            <h3 style="color:var(--accent)">两种调用方式</h3>
+            <div style="font-size:var(--small-size); line-height:1.8">
+              <div style="margin-bottom:0.35rem"><strong>显性调用</strong>（推荐）：直接说「用合同审查 Skill 帮我看这份合同」，AI 精准执行，结果稳定</div>
+              <div><strong>隐性调用</strong>：AI 读你的指令，自动判断要不要触发某个 Skill——取决于 description 写得够不够准</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:0.6rem">
+          <div class="card reveal" style="--d:6">
+            <h3>从零到第一个 Skill</h3>
+            <ol style="padding-left:1.1rem; font-size:var(--small-size); line-height:2; margin:0">
+              <li>想一件你重复做了 5 次以上的事</li>
+              <li>把步骤写成 Markdown，存为 SKILL.md</li>
+              <li>TRAE 设置 → 技能 → 添加路径</li>
+              <li>用显性调用测一次，看效果</li>
+            </ol>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Skills 升华 ===== -->
+  <section class="slide" data-title="隐性经验显性化" data-notes="这是整个Part 2的收尾金句，说完停顿一两秒，不要急着翻页。">
+    <div class="stage" style="justify-content:center; text-align:center">
+      <div class="kicker reveal" style="--d:1">经验杠杆</div>
+      <div class="quote reveal" style="--d:2; font-size:clamp(1.5rem,3.4vw,2.6rem); letter-spacing:-0.01em">
+        我们不需要学会编程，<br>但需要学会把自己的判断<span class="highlight">写清楚</span>。
+      </div>
+      <p class="reveal" style="--d:3; margin-top:1.5rem; max-width:640px; margin-left:auto; margin-right:auto">做 Skill 的过程，就是把「凭感觉」的判断翻译成「可描述」的步骤。
+
+这不只是在封装工作，而是在<span class="highlight">把你的经验做成杠杆</span>。</p>
+    </div>
+  </section>
+
+  <!-- ===== PART 3 过渡 ===== -->
+  <section class="slide part-transition" data-title="Part 3" data-notes="说：前两部分让AI在你的工作现场里工作，第三部分让它能看见更大的世界。">
+    <div class="stage" style="justify-content:center; text-align:center">
+      <div class="kicker reveal" style="--d:1">Part 3</div>
+      <h1 class="reveal" style="--d:2">MCP<br>AI 同事需要资源支持</h1>
+      <div class="part-line reveal" style="--d:3"></div>
+    </div>
+  </section>
+
+  <!-- ===== MCP 是什么 ===== -->
+  <section class="slide" data-title="MCP 是什么" data-notes="左右对比是重点。说：你现在在IDE里工作，一切都很顺，然后你需要查一个法条——你还是要切出去。MCP就是解决这个最后一公里的问题。">
+    <div class="stage">
+      <div class="kicker reveal" style="--d:1">Model Context Protocol</div>
+      <h2 class="reveal" style="--d:2">文件夹以外的世界，AI 原本看不见</h2>
+      <div class="grid-2">
+        <div class="card reveal" style="--d:3; border-left:3px solid var(--accent-2)">
+          <h3 style="color:var(--accent-2)">没有 MCP</h3>
+          <p>只能读本地文件。法宝查案例→要切窗口。飞书发通知→要手动发。</p>
+        </div>
+        <div class="card reveal" style="--d:4; border-left:3px solid var(--accent)">
+          <h3 style="color:var(--accent)">有了 MCP</h3>
+          <p>AI 直接调用外部系统。查法条、发飞书、读小红书，全在 IDE 里闭环。</p>
+        </div>
+      </div>
+      <div class="quote reveal" style="--d:5; font-size:var(--body-size); margin-top:1rem">
+        MCP 是 AI 时代的通用 USB 标准。某个系统做了「插头」（Server），你的 Coding Agent 做了「插座」（Client），一插上，AI 就能跟那个系统说话。
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 重要 MCP 清单 ===== -->
+  <section class="slide" data-title="重要 MCP" data-notes="快速过，不要逐个介绍。说：现在更值得装的是能直接接进律师日常流的工具。飞书和北大法宝还是最直接，企查查补主体尽调，flomo补随手沉淀和会后整理。最后补一句：最近国内官方 MCP 也在变多，高德地图也已经出了。">
+    <div class="stage">
+      <div class="kicker reveal" style="--d:1">值得安装的 MCP</div>
+      <h2 class="reveal" style="--d:2">按律师实际用途分类</h2>
+      <div class="grid-2" style="grid-template-columns:repeat(3,1fr); gap:0.6rem">
+        <div class="card reveal" style="--d:3; padding:0.7rem 1rem"><h3>高德地图</h3><p>路线规划、周边检索、出差办案行程辅助</p></div>
+        <div class="card reveal" style="--d:3; padding:0.7rem 1rem"><h3>企查查</h3><p>企业尽调、涉诉失信、实控人与风险画像</p></div>
+        <div class="card reveal" style="--d:4; padding:0.7rem 1rem"><h3>飞书</h3><p>读写文档、更新多维表格、发群消息</p></div>
+        <div class="card reveal" style="--d:4; padding:0.7rem 1rem"><h3>微软 365</h3><p>连接 Outlook、Teams、OneDrive</p></div>
+        <div class="card reveal" style="--d:5; padding:0.7rem 1rem"><h3>flomo</h3><p>会后沉淀、灵感卡片、待跟进事项随手入库</p></div>
+        <div class="card reveal" style="--d:5; padding:0.7rem 1rem"><h3>北大法宝</h3><p>法律检索 · 溯源链接 · 幻觉纠偏</p></div>
+      </div>
+      <p class="reveal muted" style="--d:6">最近国内官方 MCP 也在加速：企查查、flomo、高德都已上线；选工具时优先看开放平台/帮助中心。</p>
+    </div>
+  </section>
+
+  <!-- ===== 北大法宝 MCP ===== -->
+  <section class="slide" data-title="北大法宝 MCP" data-notes="用自己的真实感受说。我跑通了，也写了教程。MCP这个协议的价值在于：AI不再只在你的文件夹里工作，它能调用外部工具——查法条、发消息、搜案例。然后快速翻过，说：配置教程在我公众号里，今天时间有限不展开。">
+    <div class="stage">
+      <div class="kicker reveal" style="--d:1">一手经验 · mcp.pkulaw.com</div>
+      <h2 class="reveal" style="--d:2">北大法宝 MCP · 接入前后的差别</h2>
+      <div class="grid-2">
+        <div class="card reveal" style="--d:3; border-left:3px solid var(--accent-2)">
+          <h3 style="color:var(--accent-2)">接入前</h3>
+          <p>需要查法条→切浏览器→搜索→复制→切回 IDE→粘贴。每次 5-10 分钟，打断思路。</p>
+        </div>
+        <div class="card reveal" style="--d:4; border-left:3px solid var(--accent)">
+          <h3 style="color:var(--accent)">接入后</h3>
+          <p>@案卷.docx 直接问，AI 调用法宝数据库，结果带可点击原文链接，全程不离开 IDE。</p>
+        </div>
+      </div>
+      <ul style="margin-top:0.8rem; padding-left:1.2rem">
+        <li class="reveal" style="--d:5">语义检索 · 精准定位 · 溯源链接 · 幻觉纠偏</li>
+        <li class="reveal muted" style="--d:6">⚠ 试用时间已久，后续商业化路径尚不明朗，不建议作为稳定工具完全依赖。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ===== 企查查 MCP ===== -->
+  <section class="slide" data-title="企查查 MCP" data-notes="这页的核心话术：北大法宝解决法律检索，企查查解决主体尽调。律师最直接的价值，不是少开一个网页，而是把主体搜索、工商底盘、实控人、涉诉、失信、舆情这些公开商业信息直接拉进同一轮对话。">
+    <div class="stage" style="padding:clamp(1rem,2.2vw,1.8rem)">
+      <div class="kicker reveal" style="--d:1">官方开放平台 · openapi.qcc.com/mcp</div>
+      <h2 class="reveal" style="--d:2">企查查 MCP · 把企业尽调直接拉进对话</h2>
+      <div class="grid-2" style="margin-top:0.8rem">
+        <div class="card reveal" style="--d:3; border-left:3px solid var(--accent)">
+          <h3 style="color:var(--accent)">官方定位</h3>
+          <p>企查查官方页把它定位为「让 AI 真正懂企业」，适用场景包括企业尽调、合作风险评估、企业动态追踪、供应链风险管理等。</p>
+        </div>
+        <div class="card reveal" style="--d:4; border-left:3px solid var(--accent-2)">
+          <h3 style="color:var(--accent-2)">律师最常用的 4 类信息</h3>
+          <p>主体搜索与工商底盘、变更记录与实控人、涉诉 / 失信风险、新闻舆情。先把「对方是谁、稳不稳、风险在哪」一轮问清。</p>
+        </div>
+      </div>
+      <div class="reveal" style="--d:5; display:grid; grid-template-columns:repeat(4,1fr); gap:0.6rem; margin-top:0.8rem">
+        <div class="card" style="padding:0.7rem 0.8rem">
+          <h3>模糊找主体</h3>
+          <p style="font-size:var(--small-size)">名称 / 产品 / 电话 / 地址都能搜</p>
+        </div>
+        <div class="card" style="padding:0.7rem 0.8rem">
+          <h3>看底盘</h3>
+          <p style="font-size:var(--small-size)">工商登记 · 变更记录 · 实控人</p>
+        </div>
+        <div class="card" style="padding:0.7rem 0.8rem">
+          <h3>查风险</h3>
+          <p style="font-size:var(--small-size)">涉诉案件 · 失信记录 · 合规隐患</p>
+        </div>
+        <div class="card" style="padding:0.7rem 0.8rem">
+          <h3>跟动态</h3>
+          <p style="font-size:var(--small-size)">企业新闻舆情 · 公开动态追踪</p>
+        </div>
+      </div>
+      <p class="reveal muted" style="--d:6; margin-top:0.7rem">官方页还写明支持 Cherry Studio、飞书集成平台、腾讯云、扣子等 Host；更适合公开商业信息尽调，不替代原件复核。</p>
+    </div>
+  </section>
+
+  <!-- ===== 小红书 MCP + 风险 ===== -->
+  <section class="slide" data-title="MCP 风险底线" data-notes="这五条要认真念，不是走过场。律师的数据安全底线比任何行业都高，敏感材料先脱敏这不是建议是必须。然后说：MCP 先从官方 Server、只读权限、公开信息场景开始，别一上来就把案件材料全接出去。">
+    <div class="stage">
+      <div class="kicker reveal" style="--d:1; color:var(--accent-2); border-color:rgba(203,95,61,0.35); background:rgba(203,95,61,0.08)">⚠ 安全边界</div>
+      <h2 class="reveal" style="--d:2">MCP 接入的 5 条底线</h2>
+      <div class="reveal" style="--d:3; display:grid; grid-template-columns:1fr 1fr; gap:0.7rem; margin-top:0.4rem">
+        <div class="card card-warning" style="display:flex; align-items:flex-start; gap:0.7rem">
+          <span style="font-size:1.4rem; line-height:1; flex-shrink:0; margin-top:0.1rem">🔒</span>
+          <div>
+            <h3 style="font-size:clamp(0.82rem,1.15vw,0.96rem)">敏感材料先脱敏</h3>
+            <p style="font-size:var(--small-size)">客户姓名、案号、金额上外部 MCP 之前必须处理。这不是建议，是底线。</p>
+          </div>
+        </div>
+        <div class="card card-warning" style="display:flex; align-items:flex-start; gap:0.7rem">
+          <span style="font-size:1.4rem; line-height:1; flex-shrink:0; margin-top:0.1rem">✅</span>
+          <div>
+            <h3 style="font-size:clamp(0.82rem,1.15vw,0.96rem)">优先选官方出品的 Server</h3>
+            <p style="font-size:var(--small-size)">Anthropic 官方、大厂自营 MCP 优先；避免来路不明的第三方插件。</p>
+          </div>
+        </div>
+        <div class="card card-warning" style="display:flex; align-items:flex-start; gap:0.7rem">
+          <span style="font-size:1.4rem; line-height:1; flex-shrink:0; margin-top:0.1rem">📖</span>
+          <div>
+            <h3 style="font-size:clamp(0.82rem,1.15vw,0.96rem)">第三方 Server 先读文档</h3>
+            <p style="font-size:var(--small-size)">安装前看清楚它能读写哪些权限，不确定就不装。</p>
+          </div>
+        </div>
+        <div class="card card-warning" style="display:flex; align-items:flex-start; gap:0.7rem">
+          <span style="font-size:1.4rem; line-height:1; flex-shrink:0; margin-top:0.1rem">👁️</span>
+          <div>
+            <h3 style="font-size:clamp(0.82rem,1.15vw,0.96rem)">权限能只读就不写</h3>
+            <p style="font-size:var(--small-size)">能看数据的权限，不要同时给它修改、发送数据的权限。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== OpenClaw 是什么 ===== -->
+  <section class="slide" data-title="OpenClaw" data-notes="先讲清楚它现在更准确的定位：自托管 Gateway / AI 编排框架，不是大模型本身。新版官方文档的关键词是 Control UI、channels、nodes。然后再说什么场景适合。月报那个教训还能讲，但结论改成：OpenClaw 更适合需要持续监控、跨渠道响应、允许它自己探索路径的任务。">
+    <div class="stage">
+      <div class="kicker reveal" style="--d:1">全天候运行的 AI 同事</div>
+      <h2 class="reveal" style="--d:2">OpenClaw · 让 AI 自主执行，而不只是回答</h2>
+      <div class="grid-2" style="margin-top:0.8rem">
+        <div style="display:flex; flex-direction:column; gap:0.6rem">
+          <div class="card reveal" style="--d:3">
+            <h3 style="color:var(--accent)">它是什么</h3>
+            <p>自托管 Gateway / AI 编排框架，不是大模型本身。选一个模型，OpenClaw 坐在上面，把它变成一个可以<strong>自主规划、全天候运行、实际操控电脑、跨聊天渠道响应</strong>的智能体。</p>
+          </div>
+          <div class="card reveal" style="--d:4">
+            <h3 style="color:var(--accent)">四个核心特性</h3>
+            <p>⏰ <strong>持续性</strong>：7×24 小时运行，不需要你在场<br>
+               🧭 <strong>自主性</strong>：给目标，自己规划路径，遇到问题自己调整<br>
+               🛠️ <strong>工具调用</strong>：下载文件、运行代码、浏览网页、操作本地应用<br>
+               🌐 <strong>多通道 / 多端</strong>：新版 docs 已把 dashboard、聊天渠道、iOS / Android nodes 单独拉成主线能力</p>
+            <p style="font-size:var(--small-size); color:var(--text-faint); margin-top:0.35rem">上手路径也更轻：先跑 onboarding，再开 dashboard，在浏览器里测通后再接飞书、Telegram、QQ Bot 等入口。</p>
+          </div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:0.6rem">
+          <div class="card card-highlight reveal" style="--d:5">
+            <h3>✅ 适合的场景</h3>
+            <p>步骤不确定、需要 AI 自主探索、可以允许慢一点、涉及持续监控的任务</p>
+            <ul style="padding-left:1rem; margin-top:0.4rem; font-size:var(--small-size)">
+              <li>持续监控某领域新判决、政策动态</li>
+              <li>定期汇总行业简报，发到飞书群</li>
+              <li>跟踪公开信息变化，定时推送</li>
+            </ul>
+          </div>
+          <div class="card card-warning reveal" style="--d:6">
+            <h3>❌ 不适合的场景</h3>
+            <p>流程完全固定、需要稳定输出的任务——用 Skills 效率更高、Token 消耗更少。</p>
+            <p style="font-size:var(--small-size); color:var(--text-faint); margin-top:0.3rem">我的月报教训：固定流程任务，不该让它「自由发挥」。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 收尾 ===== -->
+  <section class="slide takeaway-slide" data-title="收尾" data-notes="节奏放慢，说完停顿一下。不要急着翻Q&A页。">
+    <div class="stage" style="justify-content:center; text-align:center">
+      <div class="kicker reveal" style="--d:1">Takeaway</div>
+      <div class="quote reveal" style="--d:2">
+        大模型输出回归值。<br>人的价值，在于异常值。
+      </div>
+      <div class="takeaway-rule reveal" style="--d:3"></div>
+      <p class="takeaway-steps reveal" style="--d:4">
+        取舍带来判断力。<br>
+        判断力就是审美。<br>
+        <span class="highlight">「审美」是稀缺的。</span>
+      </p>
+    </div>
+  </section>
+
+  <section class="slide takeaway-slide" data-title="附加值" data-notes="这一页用来抛下一个问题，承接到法律服务之外的价值。停一下，把问题抛给大家。">
+    <div class="stage" style="justify-content:center; text-align:center">
+      <div class="kicker reveal" style="--d:1">Next</div>
+      <div class="quote reveal" style="--d:2">
+        法律服务之外，<br>律师还能提供什么附加值？
+      </div>
+      <div class="takeaway-rule reveal" style="--d:3"></div>
+      <p class="takeaway-steps reveal" style="--d:4">
+        <span class="highlight">解决真实问题。</span>
+      </p>
+    </div>
+  </section>
+
+  <!-- ===== Q&A ===== -->
+  <section class="slide qa-slide" data-title="Q &amp; A" data-notes="说：谢谢大家。公众号 AI 歧路花园我会持续写。留几秒让大家扫码，再开始 Q&A 环节。">
+    <div class="stage" style="justify-content:center; text-align:center">
+      <div class="kicker reveal" style="--d:1">谢谢大家 · Q &amp; A</div>
+      <div class="qa-question reveal" style="--d:2">
+        你最希望先自动化的一个任务是什么？
+      </div>
+      <div class="reveal" style="--d:3; display:flex; gap:3rem; justify-content:center; align-items:flex-end; margin-top:2rem; flex-wrap:wrap">
+        <div style="text-align:center">
+          <div style="width:140px; height:140px; border:2px solid var(--line); border-radius:12px; margin:0 auto; overflow:hidden; background:#fff; box-shadow:0 6px 16px rgba(25,40,45,0.08)">
+            <img src="wechat-official-account.jpg" alt="公众号二维码 AI 歧路花园" style="width:100%; height:100%; object-fit:contain; display:block; background:#fff">
+          </div>
+          <p style="margin-top:0.5rem; font-size:var(--small-size); color:var(--text-sub)">公众号<br>AI 歧路花园</p>
+        </div>
+      </div>
+      <p class="reveal muted" style="--d:4; margin-top:1.2rem">杜思敏 · 大成（成都）· AI 歧路花园</p>
+    </div>
+  </section>
+
+</main>
+
+<script>
+(() => {
+  const deckEl = document.getElementById('deck');
+  const STORAGE_KEY = `slides-draft:${location.pathname}`;
+
+  let slides = [];
+  let stages = [];
+  let observer = null;
+
+  let current = 0;
+  let wheelLock = false;
+  let touchStartY = 0;
+  let isEditMode = false;
+  let focusedEditable = null;
+  let initialized = false;
+  let autoSaveTimer = null;
+  let speakerOpen = false;
+
+  const dotsWrap = document.getElementById('navDots');
+  const progressBar = document.getElementById('progressBar');
+  const counter = document.getElementById('counter');
+  const chapterChip = document.getElementById('chapterChip');
+  const transitionFlash = document.getElementById('transitionFlash');
+  const transitionSweep = document.getElementById('transitionSweep');
+  const brandWatermark = document.getElementById('brandWatermark');
+  const cursorAura = document.getElementById('cursorAura');
+  const cursorRing = document.getElementById('cursorRing');
+  const cursorDot = document.getElementById('cursorDot');
+  const toast = document.getElementById('toast');
+  const editToggle = document.getElementById('editToggle');
+  const saveDraftBtn = document.getElementById('saveDraftBtn');
+  const insertImageBtn = document.getElementById('insertImageBtn');
+  const exportHtmlBtn = document.getElementById('exportHtmlBtn');
+  const clearDraftBtn = document.getElementById('clearDraftBtn');
+  const imagePicker = document.getElementById('imagePicker');
+  const speakerView = document.getElementById('speakerView');
+  const speakerCurrent = document.getElementById('speakerCurrent');
+  const speakerNotes = document.getElementById('speakerNotes');
+  const speakerNext = document.getElementById('speakerNext');
+  const imageLightbox = document.getElementById('imageLightbox');
+  const imageLightboxImg = document.getElementById('imageLightboxImg');
+
+  let auraX = -999;
+  let auraY = -999;
+  let auraTX = -999;
+  let auraTY = -999;
+  let ringX = -999;
+  let ringY = -999;
+  let ringTX = -999;
+  let ringTY = -999;
+  let dotX = -999;
+  let dotY = -999;
+  let dotTX = -999;
+  let dotTY = -999;
+  let ringScale = 1;
+  let ringTargetScale = 1;
+  let dotScale = 1;
+  let dotTargetScale = 1;
+  let cursorDown = false;
+  let auraRAF = null;
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  const canUseCustomCursor = !!(cursorAura && cursorRing && cursorDot && !reducedMotion && finePointer);
+  const ALLOW_EDITING = false;
+
+  function pad(n) {
+    return String(n).padStart(2, '0');
+  }
+
+  function showToast(message) {
+    toast.textContent = message;
+    toast.classList.add('show');
+    clearTimeout(showToast._timer);
+    showToast._timer = setTimeout(() => toast.classList.remove('show'), 1300);
+  }
+
+  function isCursorInteractiveTarget(el) {
+    if (!el || isEditMode) return false;
+    return !!el.closest('button, a, .card, .pill, .ide-demo-thumb, .nav-dots button, .editor-panel button, input, textarea, select, [role="button"]');
+  }
+
+  function compactText(text, maxLen = 120) {
+    if (!text) return '';
+    const clean = String(text).replace(/\s+/g, ' ').trim();
+    if (clean.length <= maxLen) return clean;
+    return clean.slice(0, maxLen - 1) + '…';
+  }
+
+  function getSlideHeading(slide) {
+    if (!slide) return '';
+    const heading = slide.querySelector('h1, h2, h3');
+    const title = slide.dataset?.title || '';
+    const headingText = heading ? compactText(heading.textContent, 44) : '';
+    if (!headingText) return title;
+    return headingText;
+  }
+
+  function getSlideNotes(slide) {
+    if (!slide) return '';
+    const fromData = compactText(slide.dataset?.notes || '', 180);
+    if (fromData) return fromData;
+    const fallback = slide.querySelector('.quote, p, li');
+    if (!fallback) return '按当前页结构讲核心结论，再补一个实务例子。';
+    return compactText(fallback.textContent, 180);
+  }
+
+  function getNextPreview(slide) {
+    if (!slide) return '已是最后一页。';
+    const title = slide.dataset?.title || '下一页';
+    const head = getSlideHeading(slide);
+    const bullets = [...slide.querySelectorAll('li')]
+      .slice(0, 2)
+      .map((li, i) => `${i + 1}. ${compactText(li.textContent, 32)}`)
+      .join('\n');
+    if (!bullets) return `${title}\n${head}`;
+    return `${title}\n${bullets}`;
+  }
+
+  function updateSpeakerView(index = current) {
+    if (!speakerView) return;
+    const slide = slides[index];
+    const nextSlide = slides[index + 1];
+    speakerCurrent.textContent = `${pad(index + 1)} · ${slide?.dataset?.title || ''}\n${getSlideHeading(slide)}`;
+    speakerNotes.textContent = getSlideNotes(slide);
+    speakerNext.textContent = getNextPreview(nextSlide);
+  }
+
+  function setSpeakerView(on, silent = false) {
+    speakerOpen = on;
+    if (!speakerView) return;
+    speakerView.classList.toggle('show', on);
+    speakerView.setAttribute('aria-hidden', on ? 'false' : 'true');
+    if (on) updateSpeakerView(current);
+    if (!silent) showToast(on ? '演讲者视图已开启（按 P 关闭）' : '演讲者视图已关闭');
+  }
+
+  function isLightboxOpen() {
+    return !!imageLightbox?.classList.contains('show');
+  }
+
+  function openLightbox(src, alt = '放大图预览') {
+    if (!imageLightbox || !imageLightboxImg || !src) return;
+    imageLightboxImg.src = src;
+    imageLightboxImg.alt = alt;
+    imageLightbox.classList.add('show');
+    imageLightbox.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('lightbox-open');
+  }
+
+  function closeLightbox() {
+    if (!imageLightbox || !imageLightboxImg) return;
+    imageLightbox.classList.remove('show');
+    imageLightbox.setAttribute('aria-hidden', 'true');
+    imageLightboxImg.removeAttribute('src');
+    document.body.classList.remove('lightbox-open');
+  }
+
+  function loopAura() {
+    auraX += (auraTX - auraX) * 0.16;
+    auraY += (auraTY - auraY) * 0.16;
+    ringX += (ringTX - ringX) * 0.22;
+    ringY += (ringTY - ringY) * 0.22;
+    dotX += (dotTX - dotX) * 0.42;
+    dotY += (dotTY - dotY) * 0.42;
+
+    const desiredRingScale = ringTargetScale * (cursorDown ? 0.9 : 1);
+    const desiredDotScale = dotTargetScale * (cursorDown ? 0.82 : 1);
+    ringScale += (desiredRingScale - ringScale) * 0.2;
+    dotScale += (desiredDotScale - dotScale) * 0.25;
+
+    if (cursorAura) {
+      cursorAura.style.transform = `translate3d(${auraX}px, ${auraY}px, 0)`;
+    }
+    if (cursorRing) {
+      cursorRing.style.transform = `translate3d(${ringX}px, ${ringY}px, 0) scale(${ringScale})`;
+    }
+    if (cursorDot) {
+      cursorDot.style.transform = `translate3d(${dotX}px, ${dotY}px, 0) scale(${dotScale})`;
+    }
+    auraRAF = requestAnimationFrame(loopAura);
+  }
+
+  function flashTransition() {
+    transitionFlash.classList.remove('active');
+    if (transitionSweep) transitionSweep.classList.remove('active');
+    void transitionFlash.offsetWidth;
+    if (transitionSweep) void transitionSweep.offsetWidth;
+    transitionFlash.classList.add('active');
+    if (transitionSweep) transitionSweep.classList.add('active');
+  }
+
+  function attachWatermarkToStage(index = current) {
+    if (!brandWatermark) return;
+    const slide = slides[index];
+    const stage = slide?.querySelector('.stage');
+    if (!stage) return;
+    if (brandWatermark.parentElement !== stage) {
+      stage.appendChild(brandWatermark);
+    }
+  }
+
+  function updateChrome(index, withFlash = true) {
+    const prev = current;
+    current = index;
+    const pct = ((index + 1) / slides.length) * 100;
+    progressBar.style.width = pct + '%';
+    counter.textContent = `${pad(index + 1)} / ${pad(slides.length)}`;
+    const title = slides[index]?.dataset?.title || '';
+    chapterChip.textContent = `${pad(index + 1)} · ${title}`;
+    [...dotsWrap.querySelectorAll('button')].forEach((d, i) => {
+      d.classList.toggle('active', i === index);
+      d.setAttribute('aria-current', i === index ? 'true' : 'false');
+    });
+    attachWatermarkToStage(index);
+    updateSpeakerView(index);
+    if (withFlash && initialized && prev !== index) flashTransition();
+  }
+
+  function goTo(index) {
+    const safe = Math.max(0, Math.min(index, slides.length - 1));
+    slides[safe].scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function getRevealItems(slide) {
+    if (!slide) return [];
+    return [...slide.querySelectorAll('.reveal')];
+  }
+
+  function isStepSlide(slide) {
+    return !!slide?.classList?.contains('step-reveal');
+  }
+
+  function getRevealStep(slide) {
+    const raw = Number(slide?.dataset?.revealStep || 0);
+    if (!Number.isFinite(raw)) return 0;
+    return Math.max(0, Math.floor(raw));
+  }
+
+  function setRevealStep(slide, step) {
+    const items = getRevealItems(slide);
+    const safe = Math.max(0, Math.min(Math.floor(step), items.length));
+    items.forEach((el, i) => {
+      el.classList.toggle('revealed', i < safe);
+    });
+    if (slide) {
+      slide.dataset.revealStep = String(safe);
+      slide.dataset.revealTotal = String(items.length);
+    }
+    return { step: safe, total: items.length };
+  }
+
+  function primeReveal(index) {
+    const slide = slides[index];
+    if (!slide) return;
+    const total = getRevealItems(slide).length;
+    if (!total) return;
+    if (!isStepSlide(slide)) {
+      setRevealStep(slide, total);
+      return;
+    }
+    if (getRevealStep(slide) === 0) setRevealStep(slide, 1);
+  }
+
+  function revealNextInCurrent() {
+    const slide = slides[current];
+    if (!slide) return false;
+    if (!isStepSlide(slide)) return false;
+    const total = getRevealItems(slide).length;
+    if (!total) return false;
+    const step = getRevealStep(slide);
+    if (step >= total) return false;
+    setRevealStep(slide, step + 1);
+    return true;
+  }
+
+  function revealPrevInCurrent() {
+    const slide = slides[current];
+    if (!slide) return false;
+    if (!isStepSlide(slide)) return false;
+    const total = getRevealItems(slide).length;
+    if (!total) return false;
+    const step = getRevealStep(slide);
+    if (step <= 0) return false;
+    setRevealStep(slide, step - 1);
+    return true;
+  }
+
+  function goNext() {
+    if (!isEditMode && revealNextInCurrent()) return;
+    goTo(current + 1);
+  }
+
+  function goPrev() {
+    if (!isEditMode && revealPrevInCurrent()) return;
+    const prevIndex = Math.max(0, current - 1);
+    if (prevIndex === current) return;
+    if (!isEditMode) {
+      const prevSlide = slides[prevIndex];
+      if (prevSlide) {
+        const prevTotal = getRevealItems(prevSlide).length;
+        if (prevTotal && isStepSlide(prevSlide)) setRevealStep(prevSlide, prevTotal);
+      }
+    }
+    goTo(prevIndex);
+  }
+
+  function buildDots() {
+    dotsWrap.innerHTML = '';
+    slides.forEach((_, i) => {
+      const dot = document.createElement('button');
+      dot.type = 'button';
+      dot.ariaLabel = `跳转到第 ${i + 1} 页`;
+      dot.title = slides[i]?.dataset?.title ? `第 ${i + 1} 页：${slides[i].dataset.title}` : `第 ${i + 1} 页`;
+      dot.addEventListener('click', () => goTo(i));
+      dotsWrap.appendChild(dot);
+    });
+  }
+
+  function setupObserver() {
+    if (observer) observer.disconnect();
+    observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const index = slides.indexOf(entry.target);
+          entry.target.classList.add('visible');
+          updateChrome(index);
+          if (!isEditMode) primeReveal(index);
+        }
+      });
+    }, { threshold: 0.62 });
+    slides.forEach(slide => observer.observe(slide));
+  }
+
+  function setupStageGlow() {
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    stages.forEach((stage) => {
+      if (stage.dataset.glowBound === '1') return;
+      stage.dataset.glowBound = '1';
+      stage.addEventListener('mousemove', (e) => {
+        const r = stage.getBoundingClientRect();
+        const x = ((e.clientX - r.left) / r.width) * 100;
+        const y = ((e.clientY - r.top) / r.height) * 100;
+        stage.style.setProperty('--mx', `${x}%`);
+        stage.style.setProperty('--my', `${y}%`);
+        if (reduced) return;
+        const dx = (x - 50) / 50;
+        const dy = (y - 50) / 50;
+        const ry = Math.max(-3.8, Math.min(3.8, dx * 3.8));
+        const rx = Math.max(-2.8, Math.min(2.8, -dy * 2.8));
+        stage.style.setProperty('--rx', `${rx.toFixed(2)}deg`);
+        stage.style.setProperty('--ry', `${ry.toFixed(2)}deg`);
+      });
+      stage.addEventListener('mouseleave', () => {
+        stage.style.setProperty('--mx', '82%');
+        stage.style.setProperty('--my', '8%');
+        stage.style.setProperty('--rx', '0deg');
+        stage.style.setProperty('--ry', '0deg');
+      });
+    });
+  }
+
+  function collectEditableTargets() {
+    const selector = 'h1, h2, h3, p, li, .pill, .quote, .kicker, .code';
+    const targets = [...deckEl.querySelectorAll(selector)];
+    targets.forEach((el, i) => {
+      if (!el.dataset.editId) el.dataset.editId = `e-${i}`;
+      el.dataset.editable = 'true';
+      if (isEditMode) {
+        el.setAttribute('contenteditable', 'true');
+        el.setAttribute('spellcheck', 'false');
+      }
+    });
+    return targets;
+  }
+
+  function setEditMode(on) {
+    if (!ALLOW_EDITING) return;
+    isEditMode = on;
+    document.body.classList.toggle('edit-mode', on);
+    document.body.classList.toggle('custom-cursor', canUseCustomCursor && !on);
+    editToggle.classList.toggle('active', on);
+    const targets = collectEditableTargets();
+    if (!on) {
+      targets.forEach(el => el.removeAttribute('contenteditable'));
+      showToast('已退出编辑模式');
+      return;
+    }
+    showToast('编辑模式已开启（按 E 切换）');
+  }
+
+  function saveDraft(show = true) {
+    const payload = {
+      version: 1,
+      updatedAt: new Date().toISOString(),
+      deckHTML: deckEl.innerHTML
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    if (show) showToast('草稿已保存');
+  }
+
+  function scheduleAutoSave() {
+    clearTimeout(autoSaveTimer);
+    autoSaveTimer = setTimeout(() => saveDraft(false), 500);
+  }
+
+  function loadDraftIfAny() {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return false;
+    try {
+      const draft = JSON.parse(raw);
+      if (!draft?.deckHTML) return false;
+      const restore = window.confirm('检测到本地草稿，是否恢复上次编辑内容？');
+      if (!restore) return false;
+      deckEl.innerHTML = draft.deckHTML;
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  function clearDraft() {
+    localStorage.removeItem(STORAGE_KEY);
+    showToast('已清空本地草稿');
+  }
+
+  function exportHtml() {
+    const wasEdit = isEditMode;
+    const wasSpeaker = speakerOpen;
+    if (wasEdit) setEditMode(false);
+    if (wasSpeaker) setSpeakerView(false, true);
+
+    const cloned = document.documentElement.cloneNode(true);
+    cloned.querySelectorAll('.slide').forEach(s => s.classList.remove('visible'));
+    const clonedToast = cloned.querySelector('#toast');
+    if (clonedToast) clonedToast.remove();
+    const clonedAura = cloned.querySelector('#cursorAura');
+    if (clonedAura) clonedAura.remove();
+    const clonedRing = cloned.querySelector('#cursorRing');
+    if (clonedRing) clonedRing.remove();
+    const clonedDot = cloned.querySelector('#cursorDot');
+    if (clonedDot) clonedDot.remove();
+    cloned.body.classList.remove('edit-mode');
+    cloned.body.classList.remove('custom-cursor');
+
+    const output = '<!DOCTYPE html>\n' + cloned.outerHTML;
+    const blob = new Blob([output], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'slides-edited.html';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+
+    if (wasEdit) setEditMode(true);
+    if (wasSpeaker) setSpeakerView(true, true);
+    showToast('已导出 HTML');
+  }
+
+  function insertImage(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const stage = deckEl.querySelector('.slide.visible .stage') || stages[current];
+      if (!stage) return;
+
+      const wrap = document.createElement('div');
+      wrap.className = 'injected-image-wrap reveal';
+      wrap.style.setProperty('--d', '7');
+
+      const img = document.createElement('img');
+      img.className = 'injected-image';
+      img.src = reader.result;
+      img.alt = file.name || '插入图片';
+
+      wrap.appendChild(img);
+      if (focusedEditable && focusedEditable.closest('.stage') === stage) {
+        focusedEditable.insertAdjacentElement('afterend', wrap);
+      } else {
+        stage.appendChild(wrap);
+      }
+      collectEditableTargets();
+      saveDraft(false);
+      showToast('图片已插入（已嵌入当前文件）');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function rebindDeck() {
+    slides = [...deckEl.querySelectorAll('.slide')];
+    stages = [...deckEl.querySelectorAll('.stage')];
+    slides.forEach(slide => {
+      const total = getRevealItems(slide).length;
+      if (!total) return;
+      if (isStepSlide(slide)) {
+        setRevealStep(slide, 0);
+      } else {
+        setRevealStep(slide, total);
+      }
+    });
+    buildDots();
+    setupObserver();
+    setupStageGlow();
+    collectEditableTargets();
+    const safeIndex = Math.min(current, slides.length - 1);
+    updateChrome(safeIndex, false);
+    primeReveal(safeIndex);
+  }
+
+  loadDraftIfAny();
+  rebindDeck();
+  initialized = true;
+
+  deckEl.addEventListener('focusin', (e) => {
+    if (e.target?.dataset?.editable === 'true') focusedEditable = e.target;
+  });
+  deckEl.addEventListener('input', (e) => {
+    if (!isEditMode) return;
+    if (e.target?.dataset?.editable === 'true') scheduleAutoSave();
+  });
+
+  editToggle.addEventListener('click', () => setEditMode(!isEditMode));
+  saveDraftBtn.addEventListener('click', () => saveDraft(true));
+  clearDraftBtn.addEventListener('click', () => {
+    const ok = window.confirm('确认清空本地草稿？');
+    if (ok) clearDraft();
+  });
+  exportHtmlBtn.addEventListener('click', exportHtml);
+  insertImageBtn.addEventListener('click', () => imagePicker.click());
+  imagePicker.addEventListener('change', (e) => {
+    const file = e.target.files?.[0];
+    insertImage(file);
+    imagePicker.value = '';
+  });
+  deckEl.addEventListener('click', (e) => {
+    const thumb = e.target?.closest?.('.js-lightbox-image');
+    if (!thumb || isEditMode) return;
+    const src = thumb.dataset.fullSrc || thumb.getAttribute('src');
+    openLightbox(src, thumb.getAttribute('alt') || '放大图预览');
+    e.preventDefault();
+  });
+  if (imageLightbox) {
+    imageLightbox.addEventListener('click', closeLightbox);
+  }
+
+  document.addEventListener('keydown', (e) => {
+    const k = e.key;
+    const isTyping = document.activeElement && document.activeElement.isContentEditable;
+    if (isLightboxOpen()) {
+      if (k === 'Escape' || k === 'Enter' || k === ' ') {
+        e.preventDefault();
+        closeLightbox();
+      }
+      return;
+    }
+
+    if (ALLOW_EDITING && (e.ctrlKey || e.metaKey) && k.toLowerCase() === 's') {
+      e.preventDefault();
+      saveDraft(true);
+      return;
+    }
+    if (ALLOW_EDITING && (e.ctrlKey || e.metaKey) && k.toLowerCase() === 'e') {
+      e.preventDefault();
+      exportHtml();
+      return;
+    }
+    if (ALLOW_EDITING && (k === 'e' || k === 'E') && !isTyping) {
+      e.preventDefault();
+      setEditMode(!isEditMode);
+      return;
+    }
+    if ((k === 'p' || k === 'P') && !isTyping) {
+      e.preventDefault();
+      setSpeakerView(!speakerOpen);
+      return;
+    }
+    if (k === 'Escape' && speakerOpen) {
+      setSpeakerView(false);
+      return;
+    }
+    if (k === 'Escape' && isEditMode) {
+      setEditMode(false);
+      return;
+    }
+
+    if (isTyping) return;
+    if (["ArrowDown", "PageDown", " ", "Enter"].includes(k)) {
+      e.preventDefault();
+      goNext();
+    }
+    if (["ArrowUp", "PageUp", "Backspace"].includes(k)) {
+      e.preventDefault();
+      goPrev();
+    }
+    if (k === 'Home') goTo(0);
+    if (k === 'End') goTo(slides.length - 1);
+  });
+
+  document.addEventListener('wheel', (e) => {
+    if (isEditMode || isLightboxOpen()) return;
+    if (wheelLock) return;
+    const delta = e.deltaY;
+    if (Math.abs(delta) < 22) return;
+    wheelLock = true;
+    if (delta > 0) goNext(); else goPrev();
+    setTimeout(() => { wheelLock = false; }, 420);
+  }, { passive: true });
+
+  document.addEventListener('touchstart', (e) => {
+    if (isLightboxOpen()) return;
+    touchStartY = e.changedTouches[0].clientY;
+  }, { passive: true });
+
+  document.addEventListener('touchend', (e) => {
+    if (isEditMode || isLightboxOpen()) return;
+    const endY = e.changedTouches[0].clientY;
+    const diff = touchStartY - endY;
+    if (Math.abs(diff) < 46) return;
+    if (diff > 0) goNext(); else goPrev();
+  }, { passive: true });
+
+  updateChrome(0, false);
+  showToast('按 P 打开演讲者视图');
+
+  if (canUseCustomCursor) {
+    document.body.classList.add('custom-cursor');
+    document.addEventListener('mousemove', (e) => {
+      const isInteractive = isCursorInteractiveTarget(e.target);
+      ringTargetScale = isInteractive ? 1.4 : 1;
+      dotTargetScale = isInteractive ? 1.18 : 1;
+      cursorRing.classList.toggle('interactive', isInteractive);
+
+      auraTX = e.clientX - cursorAura.offsetWidth / 2;
+      auraTY = e.clientY - cursorAura.offsetHeight / 2;
+      ringTX = e.clientX - cursorRing.offsetWidth / 2;
+      ringTY = e.clientY - cursorRing.offsetHeight / 2;
+      dotTX = e.clientX - cursorDot.offsetWidth / 2;
+      dotTY = e.clientY - cursorDot.offsetHeight / 2;
+    }, { passive: true });
+
+    document.addEventListener('mousedown', () => {
+      if (isEditMode) return;
+      cursorDown = true;
+    }, { passive: true });
+
+    document.addEventListener('mouseup', () => {
+      cursorDown = false;
+    }, { passive: true });
+
+    document.addEventListener('mouseleave', () => {
+      auraTX = -999;
+      auraTY = -999;
+      ringTX = -999;
+      ringTY = -999;
+      dotTX = -999;
+      dotTY = -999;
+      ringTargetScale = 1;
+      dotTargetScale = 1;
+      cursorDown = false;
+      cursorRing.classList.remove('interactive');
+    }, { passive: true });
+
+    auraRAF = requestAnimationFrame(loopAura);
+  }
+})();
+</script>
+</body>
+</html>
